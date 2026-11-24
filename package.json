@@ -1,0 +1,13 @@
+{
+  "name": "mine-city-rp3d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor multiplayer da MINE CITY RP 3D",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

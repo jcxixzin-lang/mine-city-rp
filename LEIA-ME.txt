@@ -1,0 +1,12 @@
+MINE CITY RP 3D — VERSÃO COM COLISÕES
+
+Nesta versão:
+- O ponto de nascimento foi movido para uma área livre da praça central (12, 0, 12), fora da fonte.
+- Foram adicionadas colisões simplificadas nos prédios, fonte, bancos, troncos de árvores e obstáculos urbanos.
+- O movimento resolve colisões por eixo, permitindo deslizar ao longo dos obstáculos.
+- Personagem, animações, mapa e introdução da cidade foram preservados.
+
+Como abrir:
+Extraia toda a pasta e abra index.html por um servidor local (recomendado). Mantenha assets-embutidos.js, character.fbx e a pasta animations junto do index.html.
+
+Controles: WASD ou setas para andar, Shift para correr, Espaço para pular, mouse para câmera e Esc para pausar.

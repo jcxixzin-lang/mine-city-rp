@@ -1,0 +1,35 @@
+MINE CITY RP 3D - MULTIPLAYER (PRIMEIRA ETAPA)
+=============================================
+
+O que esta versão faz:
+- Serve o jogo pelo endereço http://localhost:8080.
+- Cria um servidor WebSocket para até 32 conexões simultâneas.
+- Envia posição, rotação e estado de animação dos jogadores.
+- Mostra os outros jogadores usando o mesmo modelo FBX do personagem local.
+- Mostra o nome de cada jogador acima do personagem.
+- Não inclui a moto.
+
+COMO INICIAR NO WINDOWS
+1. Instale Node.js LTS: https://nodejs.org/
+2. Extraia a pasta completa do ZIP.
+3. Dê dois cliques em INICIAR-MINE-CITY.bat.
+4. Na primeira vez, o script baixa a dependência WebSocket (precisa de internet).
+5. O navegador abre em http://localhost:8080.
+6. Para testar no mesmo PC, abra uma segunda janela/aba e entre no mesmo endereço.
+7. Digite nomes diferentes quando solicitado. Os dois personagens devem aparecer um para o outro.
+
+TESTE EM OUTRO COMPUTADOR NA MESMA REDE
+- Deixe o servidor aberto no primeiro computador.
+- Descubra o IPv4 dele com o comando ipconfig.
+- No segundo computador, abra http://IP-DO-PC:8080.
+- Se o Windows perguntar, permita Node.js na rede privada/firewall.
+
+JOGAR PELA INTERNET
+Esta versão já tem a comunicação multiplayer, mas localhost só aceita conexões do próprio computador.
+Para jogadores de outras casas/cidades, o servidor Node.js precisa ficar hospedado em um serviço com IP/domínio público e conexão WebSocket liberada. Se o WebSocket estiver em outro endereço, edite server-config.js e coloque o endereço wss:// público em window.MINECITY_SERVER_URL.
+
+OBSERVAÇÕES
+- É uma primeira versão de sincronização: posição, rotação e animação básica.
+- O servidor retransmite estados enviados pelos clientes; ainda não é um servidor autoritativo anti-trapaça.
+- Não feche a janela preta enquanto estiver jogando.
+- Se a conexão falhar, veja a mensagem no HUD (SEM SERVIDOR) e o terminal do servidor.
