@@ -763,7 +763,8 @@ class TrainingBot {
  updateHud(){const v=document.getElementById('bot-hp'),b=document.getElementById('bot-bar');if(v)v.textContent=this.hp;if(b){b.style.width=(this.hp/2)+'%';b.style.background=this.hp>100?'#38c66b':this.hp>50?'#e5c642':'#e53b3b';}}
  update(dt){this.setup();if(!this.ready)return;const p=this.game.player,dx=p.position.x-this.root.position.x,dz=p.position.z-this.root.position.z,dist=Math.hypot(dx,dz);this.cooldown=Math.max(0,this.cooldown-dt);if(dist>1.65&&!this.busy){const step=Math.min(dt*1.25,dist-1.35);this.root.position.x+=dx/dist*step;this.root.position.z+=dz/dist*step;this.root.rotation.y=Math.atan2(dx,dz);this.play('walk');}else if(dist<=1.8&&!this.busy&&this.cooldown<=0){this.cooldown=1.8;this.root.rotation.y=Math.atan2(dx,dz);this.play(Math.random()<.75?'punch':'kick');p.hp=Math.max(0,p.hp-(this.current&&this.current.getClip().name==='kick'?20:10));updateHealthUI(p.hp);if(p.hp<=0){p.hp=200;p.position.set(...CONFIG.player.startPosition);updateHealthUI(200);}}else if(!this.busy&&dist>=1.8)this.play('idle');this.mixer.update(dt);}
 }
-\n/* ============ CÂMERA EM TERCEIRA PESSOA ============ */
+
+/* ============ CÂMERA EM TERCEIRA PESSOA ============ */
 class ThirdPersonCamera {
   constructor(camera, target) {
     this.camera = camera; this.target = target;
