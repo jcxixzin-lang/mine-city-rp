@@ -202,7 +202,7 @@ class Input {
     });
   }
   setEnabled(v) { this.enabled = v; this.reset(); }
-  reset() { this.keys.clear(); this.jumpQueued = false; this.mouseDX = 0; this.mouseDY = 0; this.dragging = false; if(!this.touchActive){this.touchAxis={x:0,y:0};this.touchSprint=false;} }
+  reset() { this.keys.clear(); this.jumpQueued = false; this.mouseDX = 0; this.mouseDY = 0; this.dragging = false; this.touchAxis={x:0,y:0};this.touchSprint=false;this.touchActive=false; }
   isDown(...codes) { return codes.some((c) => this.keys.has(c)); }
   getMoveAxis() {
     const keyboard={x:(this.isDown('KeyD','ArrowRight')?1:0)-(this.isDown('KeyA','ArrowLeft')?1:0),y:(this.isDown('KeyW','ArrowUp')?1:0)-(this.isDown('KeyS','ArrowDown')?1:0)};
@@ -1075,7 +1075,7 @@ game.start();
 // Mine Phone: interface inicial, tecla P e botão para celular
 const phone=document.getElementById('phone'),phoneOpen=document.getElementById('phone-open'),phoneContent=document.getElementById('phone-content'),phoneMain=document.getElementById('phone-main');
 function showPhoneApp(app){phoneMain.classList.add('hidden');phoneContent.classList.remove('hidden');const pages={messages:'<h3>💬 Mensagens</h3><p>Chat entre jogadores será integrado numa próxima etapa.</p>',contacts:'<h3>👥 Contatos</h3><p>Lista de jogadores e contatos em breve.</p>',bank:'<h3>💳 Mine Bank</h3><p>Saldo: <b>R$ 0</b></p><p>Pagamentos e transferências em breve.</p>',map:'<h3>🗺️ Mapa</h3><p>Mapa de Mine City será integrado aqui.</p>',settings:'<h3>⚙️ Configurações</h3><p>Mine Phone • versão inicial</p>',camera:'<h3>📷 Câmera</h3><p>Câmera do jogo será adicionada depois.</p>'};phoneContent.innerHTML=pages[app]||pages.settings;}
-function openPhone(){if(game.state!=='playing')return;phone.classList.remove('hidden');phoneOpen.classList.add('hidden');game.input.setEnabled(false);if(document.pointerLockElement)document.exitPointerLock();}
+function openPhone(){if(game.state!=='playing')return;phone.classList.remove('hidden');phoneOpen.classList.add('hidden');game.input.setEnabled(false);game.input.touchAxis={x:0,y:0};game.input.touchActive=false;game.input.touchSprint=false;if(document.pointerLockElement)document.exitPointerLock();}
 function closePhone(){phone.classList.add('hidden');phoneOpen.classList.remove('hidden');if(game.state==='playing'){game.input.setEnabled(true);game.tryLock();}}
 phoneOpen.addEventListener('click',openPhone);document.getElementById('phone-close').addEventListener('click',closePhone);document.getElementById('phone-home').addEventListener('click',()=>{phoneContent.classList.add('hidden');phoneMain.classList.remove('hidden');});phoneMain.querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>showPhoneApp(b.dataset.app)));window.addEventListener('keydown',e=>{if((e.code==='KeyE'||e.code==='KeyP')&&game.state==='playing'&&phone.classList.contains('hidden')){e.preventDefault();openPhone();}else if((e.code==='KeyE'||e.code==='KeyP')&&!phone.classList.contains('hidden')){e.preventDefault();closePhone();}});
 
