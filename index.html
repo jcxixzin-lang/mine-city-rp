@@ -1084,7 +1084,7 @@ if(DEVICE_MODE==='mobile'){
  const controls=document.getElementById('mobile-controls'), base=document.getElementById('joy-base'),knob=document.getElementById('joy-knob'),run=document.getElementById('mobile-run'),jump=document.getElementById('mobile-jump'),cameraZone=document.getElementById('mobile-camera-zone');
  controls.classList.remove('hidden');
  let joyId=null,camId=null,camLast={x:0,y:0},joyCenter={x:0,y:0};
- const updateJoy=e=>{const dx=e.clientX-joyCenter.x,dy=e.clientY-joyCenter.y,r=48,len=Math.hypot(dx,dy),scale=len>r?r/len:1;game.input.touchAxis={x:Math.max(-1,Math.min(1,dx*scale/r)),y:Math.max(-1,Math.min(1,-dy*scale/r))};knob.style.left=(50+game.input.touchAxis.x*38)+'%';knob.style.top=(50-game.input.touchAxis.y*38)+'%';};
+ const updateJoy=e=>{let dx=e.clientX-joyCenter.x,dy=e.clientY-joyCenter.y;const maxTravel=base.clientWidth*0.34,len=Math.hypot(dx,dy);if(len>maxTravel&&len>0){dx*=maxTravel/len;dy*=maxTravel/len;}game.input.touchAxis={x:dx/maxTravel,y:-dy/maxTravel};knob.style.left=(50+game.input.touchAxis.x*48)+'%';knob.style.top=(50+dy/maxTravel*48)+'%';};
  base.addEventListener('pointerdown',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();joyId=e.pointerId;game.input.touchActive=true;joyCenter={x:base.getBoundingClientRect().left+base.clientWidth/2,y:base.getBoundingClientRect().top+base.clientHeight/2};base.setPointerCapture(e.pointerId);updateJoy(e);});
  base.addEventListener('pointermove',e=>{if(e.pointerId===joyId)updateJoy(e);});
  const endJoy=e=>{if(e.pointerId!==joyId)return;joyId=null;game.input.touchAxis={x:0,y:0};game.input.touchActive=false;knob.style.left='50%';knob.style.top='50%';};
