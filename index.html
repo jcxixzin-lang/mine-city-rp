@@ -625,7 +625,7 @@ class Player {
       }
     }
     if (missing.length) showWarning('Algumas animações não carregaram: ' + missing.join(', ') + '.');
-    for(const [combatName,file] of Object.entries({punch:'./animations/Punching.fbx',punch2:'./animations/Punching (1).fbx',elbow:'./animations/Elbow Punching.fbx',kick:'./animations/Kicking.fbx',groinKick:'./animations/Kick To The Groin.fbx',hitFace:'./animations/Receive Punch To The Face.fbx',hitHead:'./animations/Light Hit To Head.fbx'})){try{const src=await loadFBX(loader,file);const clip=src.animations[0]?.clone();if(clip){clip.name=combatName;removeRootDrift(clip);const act=this.mixer.clipAction(clip);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;this.actions[combatName]=act;}}catch(err){console.warn('Animação de combate não encontrada:',file);}}
+    for(const [combatName,file] of Object.entries({punch:'./animations/Punching (1).fbx',punch2:'./animations/Punching (1).fbx',elbow:'./animations/Elbow Punching.fbx',kick:'./animations/Kicking.fbx',groinKick:'./animations/Kick To The Groin.fbx',hitFace:'./animations/Receive Punch To The Face.fbx',hitHead:'./animations/Light Hit To Head.fbx'})){try{const src=await loadFBX(loader,file);const clip=src.animations[0]?.clone();if(clip){clip.name=combatName;removeRootDrift(clip);const act=this.mixer.clipAction(clip);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;this.actions[combatName]=act;}}catch(err){console.warn('Animação de combate não encontrada:',file);}}
     this.play('idle', 0);
     this.mixer.update(0); // já mostra a pose de descanso em vez da pose em T
     console.info('Y Bot pronto. Animações:', Object.keys(this.actions).join(', '));
@@ -825,7 +825,7 @@ class RemotePlayers {
     this.peers.set(data.id,peer);
     return peer;
   }
-  playAttack(id,kind){const p=this.peers.get(String(id));if(!p)return;const act=p.actions[kind==='kick'?'kick':'hitFace'];if(act){act.reset().setEffectiveWeight(1).play();if(p.current)act.crossFadeFrom(p.current,.08,false);p.current=act;}}
+  playAttack(id,kind){const p=this.peers.get(String(id));if(!p)return;const act=p.actions[kind==='kick'?'kick':['punch','punch2','elbow'][Math.floor(Math.random()*3)]];if(act){act.reset().setEffectiveWeight(1).play();if(p.current)act.crossFadeFrom(p.current,.08,false);p.current=act;}}
   applySnapshot(players) {
     const seen=new Set();
     for(const data of players||[]) {
