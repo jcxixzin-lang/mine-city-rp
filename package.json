@@ -2,12 +2,26 @@
   "name": "mine-city-rp3d",
   "version": "1.0.0",
   "private": true,
-  "description": "Servidor multiplayer da MINE CITY RP 3D",
-  "main": "server.js",
+  "description": "Mine City RP 3D - Windows e Android",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "desktop": "electron .",
+    "build:exe": "electron-builder --win nsis"
   },
-  "dependencies": {
-    "ws": "^8.18.0"
+  "dependencies": { "ws": "^8.18.0" },
+  "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "electron": "^39.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.minecityrp.game",
+    "productName": "Mine City RP",
+    "directories": { "output": "dist" },
+    "win": { "target": "nsis" },
+    "nsis": { "oneClick": true, "allowToChangeInstallationDirectory": true }
   }
 }
