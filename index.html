@@ -970,11 +970,8 @@ class Game {
       this.setState('menu');
     });
     document.addEventListener('pointerlockchange', () => {
-      if (document.pointerLockElement === this.canvas) {
-        if (this.state !== 'playing') this.setState('playing');
-      } else if (this.state === 'playing' && document.getElementById('phone').classList.contains('hidden')) {
-        this.setState('paused');
-      }
+      // Cursor livre é apenas um modo de controle, não significa que saiu do jogo.
+      if (document.pointerLockElement === this.canvas && this.state !== 'playing') this.setState('playing');
     });
     this.canvas.addEventListener('click', () => {
       if (this.state === 'playing' && document.pointerLockElement !== this.canvas) this.tryLock();
@@ -986,8 +983,7 @@ class Game {
       }
     });
     window.addEventListener('blur', () => {
-      // Liberar o mouse para usar o celular/UI não deve pausar nem tirar o jogador do jogo.
-      if (this.state === 'playing' && document.getElementById('phone').classList.contains('hidden')) this.setState('paused');
+      // Perder o foco da janela não altera automaticamente o estado do jogo.
     });
   }
   tryLock() {
