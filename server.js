@@ -8,6 +8,7 @@ const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 8080);
 const MAX_PLAYERS = 32;
 const players = new Map();
+const attackCooldowns=new Map();
 let nextId = 1;
 
 const mime = {
@@ -54,7 +55,7 @@ wss.on('connection',(ws) => {
     try { msg=JSON.parse(raw.toString()); } catch { return; }
     if(msg.type==='hello') {
       const name=String(msg.name||'Jogador').replace(/[<>]/g,'').trim().slice(0,18)||'Jogador';
-      players.set(id,{state:{id,name,x:12,y:0.2225,z:12,rot:Math.PI,anim:'idle'}});
+      players.set(id,{state:{id,name,x:12,y:0.2225,z:12,rot:Math.PI,anim:'idle',hp:200}});
       ws.send(JSON.stringify({type:'welcome',id}));
       broadcastSnapshot();
       return;
@@ -67,10 +68,11 @@ wss.on('connection',(ws) => {
       const anim=['idle','walk','run','jump'].includes(msg.anim)?msg.anim:'idle';
       const old=players.get(id).state;
       old.x=n(msg.x); old.y=Math.max(-2,Math.min(30,n(msg.y))); old.z=n(msg.z);
-      old.rot=n(msg.rot); old.anim=anim;
+      old.rot=n(msg.rot); old.anim=anim; old.hp=200;
     }
+    if(msg.type==='attack'&&players.has(id)){const now=Date.now(),last=attackCooldowns.get(id)||0;if(now-last<550)return;attackCooldowns.set(id,now);const kind=msg.kind==='kick'?'kick':'punch';const attacker=players.get(id).state;let target=null,best=2.2;for(const [otherId,p] of players){if(otherId===id)continue;const dist=Math.hypot(p.state.x-attacker.x,p.state.z-attacker.z);if(dist<best){best=dist;target={id:otherId,p};}}if(target){const damage=kind==='kick'?20:10+Math.floor(Math.random()*6);target.p.state.hp=Math.max(0,(target.p.state.hp??200)-damage);for(const client of wss.clients)if(client.readyState===WebSocket.OPEN)client.send(JSON.stringify({type:'damage',target:target.id,hp:target.p.state.hp,damage,from:id}));if(target.p.state.hp<=0){target.p.state.hp=200;target.p.state.x=12;target.p.state.z=12;target.p.state.y=0.2225;}}for(const client of wss.clients)if(client.readyState===WebSocket.OPEN)client.send(JSON.stringify({type:'attack',id,kind}));}
   });
-  ws.on('close',()=>{players.delete(id);broadcastSnapshot();});
+  ws.on('close',()=>{players.delete(id);attackCooldowns.delete(id);broadcastSnapshot();});
   ws.on('error',()=>{players.delete(id);});
 });
 const snapshotTimer=setInterval(broadcastSnapshot,66);
