@@ -972,7 +972,7 @@ class Game {
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement === this.canvas) {
         if (this.state !== 'playing') this.setState('playing');
-      } else if (this.state === 'playing') {
+      } else if (this.state === 'playing' && document.getElementById('phone').classList.contains('hidden')) {
         this.setState('paused');
       }
     });
