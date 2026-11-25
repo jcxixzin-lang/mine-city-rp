@@ -744,7 +744,17 @@ class Player {
   }
 }
 
-/* ============ CÂMERA EM TERCEIRA PESSOA ============ */
+
+/* BOT DE TREINO: NPC local que persegue, ataca e recebe golpes */
+class TrainingBot {
+ constructor(game){this.game=game;this.root=new THREE.Group();this.mixer=null;this.actions={};this.current=null;this.hp=200;this.cooldown=1.4;this.busy=false;this.ready=false;this.root.position.set(15,0.2225,12);game.scene.add(this.root);this.hud=document.createElement('div');this.hud.style.cssText='position:fixed;top:70px;right:18px;width:220px;padding:10px;border-radius:12px;background:#15151dcc;color:white;z-index:6;font: bold 14px system-ui;pointer-events:none';this.hud.innerHTML='BOT DE TREINO <span id="bot-hp">200</span>/200<div style="height:12px;background:#552222;border-radius:8px;margin-top:5px;overflow:hidden"><div id="bot-bar" style="height:100%;width:100%;background:#38c66b"></div></div>';document.body.appendChild(this.hud);}
+ setup(){const p=this.game.player;if(!p.mixer||!p.visual.children.length||this.ready)return;const model=cloneSkeleton(p.visual.children[0]);this.root.add(model);this.mixer=new THREE.AnimationMixer(model);for(const n of ['idle','walk','run','punch','punch2','elbow','kick','hitFace','hitHead']){const src=p.actions[n];if(src){const a=this.mixer.clipAction(src.getClip());a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;this.actions[n]=a;}}this.play('idle');this.ready=true;}
+ play(n){const a=this.actions[n]||this.actions.idle;if(!a)return;a.reset();a.enabled=true;a.setEffectiveWeight(1);a.setEffectiveTimeScale(1);a.play();if(this.current&&this.current!==a)a.crossFadeFrom(this.current,.12,false);this.current=a;this.busy=['punch','kick','hitFace','hitHead','punch2','elbow'].includes(n);if(this.busy)setTimeout(()=>this.busy=false,Math.max(650,(a.getClip().duration||.8)*1000));}
+ receiveAttack(kind){if(!this.ready)return;const dist=this.root.position.distanceTo(this.game.player.position);if(dist>2.65)return;this.hp=Math.max(0,this.hp-(kind==='kick'?20:10+Math.floor(Math.random()*6)));this.play(Math.random()<.5?'hitFace':'hitHead');this.updateHud();if(this.hp<=0){this.hp=200;this.root.position.set(15,0.2225,12);this.updateHud();}}
+ updateHud(){const v=document.getElementById('bot-hp'),b=document.getElementById('bot-bar');if(v)v.textContent=this.hp;if(b){b.style.width=(this.hp/2)+'%';b.style.background=this.hp>100?'#38c66b':this.hp>50?'#e5c642':'#e53b3b';}}
+ update(dt){this.setup();if(!this.ready)return;const p=this.game.player,dx=p.position.x-this.root.position.x,dz=p.position.z-this.root.position.z,dist=Math.hypot(dx,dz);this.cooldown=Math.max(0,this.cooldown-dt);if(dist>1.65&&!this.busy){const step=Math.min(dt*1.25,dist-1.35);this.root.position.x+=dx/dist*step;this.root.position.z+=dz/dist*step;this.root.rotation.y=Math.atan2(dx,dz);this.play('walk');}else if(dist<=1.8&&!this.busy&&this.cooldown<=0){this.cooldown=1.8;this.root.rotation.y=Math.atan2(dx,dz);this.play(Math.random()<.75?'punch':'kick');p.hp=Math.max(0,p.hp-(this.current&&this.current.getClip().name==='kick'?20:10));updateHealthUI(p.hp);if(p.hp<=0){p.hp=200;p.position.set(...CONFIG.player.startPosition);updateHealthUI(200);}}else if(!this.busy&&dist>=1.8)this.play('idle');this.mixer.update(dt);}
+}
+\n/* ============ CÂMERA EM TERCEIRA PESSOA ============ */
 class ThirdPersonCamera {
   constructor(camera, target) {
     this.camera = camera; this.target = target;
@@ -1005,7 +1015,7 @@ class Game {
       // Cursor livre é apenas um modo de controle, não significa que saiu do jogo.
       if (document.pointerLockElement === this.canvas && this.state !== 'playing') this.setState('playing');
     });
-    this.canvas.addEventListener('mousedown',e=>{if(e.button===0&&this.state==='playing'&&document.pointerLockElement===this.canvas){if(this.player.attack('punch'))this.multiplayer.sendAttack('punch');}});window.addEventListener('keydown',e=>{if(e.code==='KeyF'&&this.state==='playing'&&!e.repeat){if(this.player.attack('kick'))this.multiplayer.sendAttack('kick');}});document.getElementById('mobile-punch').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('punch'))this.multiplayer.sendAttack('punch');});document.getElementById('mobile-kick').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('kick'))this.multiplayer.sendAttack('kick');});
+    this.canvas.addEventListener('mousedown',e=>{if(e.button===0&&this.state==='playing'&&document.pointerLockElement===this.canvas){if(this.player.attack('punch')){this.multiplayer.sendAttack('punch');this.trainingBot.receiveAttack('punch');}}});window.addEventListener('keydown',e=>{if(e.code==='KeyF'&&this.state==='playing'&&!e.repeat){if(this.player.attack('kick')){this.multiplayer.sendAttack('kick');this.trainingBot.receiveAttack('kick');}}});document.getElementById('mobile-punch').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('punch'))this.multiplayer.sendAttack('punch');});document.getElementById('mobile-kick').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('kick'))this.multiplayer.sendAttack('kick');});
     this.canvas.addEventListener('click', () => {
       if (this.state === 'playing' && document.pointerLockElement !== this.canvas) this.tryLock();
     });
