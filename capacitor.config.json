@@ -1,0 +1,6 @@
+{
+  "appId": "com.minecityrp.game",
+  "appName": "Mine City RP",
+  "webDir": "mobile-web",
+  "server": { "url": "https://mine-city-rp.onrender.com/", "cleartext": false }
+}
