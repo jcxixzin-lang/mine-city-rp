@@ -1011,7 +1011,8 @@ class Game {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
-    this.ui.onPlay(() => this.requestPlay());\n    document.addEventListener('minecity-play-click', () => this.requestPlay());
+    this.ui.onPlay(() => this.requestPlay());
+    document.addEventListener('minecity-play-click', () => this.requestPlay());
     this.ui.onResume(() => this.requestPlay());
     this.ui.onMainMenu(() => {
       if (document.pointerLockElement) document.exitPointerLock();
