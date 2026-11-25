@@ -986,7 +986,8 @@ class Game {
       }
     });
     window.addEventListener('blur', () => {
-      if (this.state === 'playing') this.setState('paused');
+      // Liberar o mouse para usar o celular/UI não deve pausar nem tirar o jogador do jogo.
+      if (this.state === 'playing' && document.getElementById('phone').classList.contains('hidden')) this.setState('paused');
     });
   }
   tryLock() {
