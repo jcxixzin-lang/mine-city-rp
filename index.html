@@ -54,7 +54,7 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 #mobile-controls.hidden{display:none!important}.joy-base{position:absolute;left:22px;bottom:28px;width:142px;height:142px;border-radius:50%;background:rgba(20,20,30,.38);border:2px solid rgba(255,255,255,.45);pointer-events:auto;touch-action:none}
 #joy-knob{position:absolute;left:50%;top:50%;width:62px;height:62px;border-radius:50%;transform:translate(-50%,-50%);background:rgba(170,65,255,.82);border:2px solid #fff;box-shadow:0 0 16px #9b42d6}
 .mobile-action{position:absolute;right:24px;border:2px solid rgba(255,255,255,.65);border-radius:50%;color:#fff;font-weight:900;background:rgba(90,30,150,.68);width:72px;height:72px;pointer-events:auto;touch-action:none;box-shadow:0 4px 14px #0006}
-#mobile-jump{bottom:32px;width:82px;height:82px;font-size:16px}#mobile-run{bottom:125px;right:28px}#mobile-camera-zone{position:absolute;right:0;top:15%;width:58%;height:65%;pointer-events:auto;touch-action:none}
+#mobile-jump{bottom:32px;width:82px;height:82px;font-size:16px}#mobile-punch,#mobile-kick{display:none!important}@media(max-width:700px){#mobile-punch,#mobile-kick{display:block!important}}#mobile-run{bottom:125px;right:28px}#mobile-camera-zone{position:absolute;right:0;top:15%;width:58%;height:65%;pointer-events:auto;touch-action:none}
 @media(max-width:700px){.hud-help{display:none}.hud-title{top:8px;left:8px;font-size:11px}.hud-fps{top:8px;right:8px;font-size:11px}}
 .fullscreen-mobile{position:fixed;top:54px;right:12px;z-index:30;width:44px;height:44px;border:1px solid #ffffff70;border-radius:12px;background:#171022dd;color:#fff;font-size:28px;line-height:1;display:none;pointer-events:auto;touch-action:manipulation}html[data-device="mobile"] .fullscreen-mobile{display:block}html[data-device="mobile"] #mobile-controls{touch-action:none}html[data-device="mobile"] #mobile-camera-zone{touch-action:none;}
 </style>
@@ -63,19 +63,19 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 </script>
 </head>
 <body>
-<div id="app"></div><div id="mobile-controls" class="hidden"><div id="mobile-camera-zone"></div><div id="joy-base" class="joy-base"><div id="joy-knob"></div></div><button id="mobile-run" class="mobile-action" type="button">CORRER</button><button id="mobile-jump" class="mobile-action" type="button">PULAR</button></div><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><button id="fullscreen-mobile" class="fullscreen-mobile" type="button" aria-label="Tela cheia" title="Tela cheia">⛶</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
+<div id="app"></div><div id="mobile-controls" class="hidden"><div id="mobile-camera-zone"></div><div id="joy-base" class="joy-base"><div id="joy-knob"></div></div><button id="mobile-run" class="mobile-action" type="button">CORRER</button><button id="mobile-jump" class="mobile-action" type="button">PULAR</button></div><button id="mobile-punch" class="mobile-action" style="right:110px;bottom:32px" type="button">SOCO</button><button id="mobile-kick" class="mobile-action" style="right:110px;bottom:120px" type="button">CHUTE</button><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><button id="fullscreen-mobile" class="fullscreen-mobile" type="button" aria-label="Tela cheia" title="Tela cheia">⛶</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
 
 <div id="city-intro" class="city-intro hidden"><div class="intro-kicker">VOCÊ ESTÁ CHEGANDO EM</div><div class="intro-city">MINE CITY</div><div class="intro-sub">RIO DE JANEIRO · BRASIL</div></div>
 
 <div id="hud" class="hud hidden">
   <div class="hud-title"><span class="hud-badge">MINE CITY RP</span><span id="device-badge" class="hud-badge" style="background:#176b43">PC</span><span id="hud-project-name"></span></div>
-  <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div>
+  <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div><div style="position:absolute;top:70px;left:18px;background:#15151dcc;padding:10px;border-radius:12px;width:220px"><b>VIDA <span id="hp-value">200</span>/200</b><div style="height:12px;background:#552222;border-radius:8px;margin-top:5px;overflow:hidden"><div id="hp-bar" style="height:100%;width:100%;background:#38c66b"></div></div></div>
   <div class="hud-help">
     <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</span>
     <span><kbd>E</kbd> celular</span><span><kbd>Espaço</kbd> pular</span>
     <span><kbd>Shift</kbd> correr</span>
     <span><kbd>Mouse</kbd> câmera</span>
-    <span><kbd>Esc</kbd> pausar</span>
+    <span><kbd>F</kbd> chute</span><span><kbd>Mouse</kbd> soco</span><span><kbd>Esc</kbd> pausar</span>
   </div>
 </div>
 
@@ -106,7 +106,8 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 
 <!-- Arquivos .fbx embutidos (gerado por tools/embutir-assets.py): faz o jogo funcionar com duplo clique -->
 <script src="./assets-embutidos.js"></script>
-<script src="./server-config.js"></script>\n<script type="module">
+<script src="./server-config.js"></script>
+<script type="module">
 import * as THREE from 'three';
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FBXLoader.js';
 import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FontLoader.js';
@@ -589,7 +590,7 @@ class Player {
     this.object.rotation.y = this.facing;
     this.mixer = null;
     this.actions = {};
-    this.currentAction = null;
+    this.currentAction = null; this.hp=200; this.attackBusy=false; this.attackCooldown=0; this.attackSerial=0;
     this.loadCharacter();
   }
   get position() { return this.object.position; }
@@ -624,6 +625,7 @@ class Player {
       }
     }
     if (missing.length) showWarning('Algumas animações não carregaram: ' + missing.join(', ') + '.');
+    for(const [combatName,file] of Object.entries({punch:'./animations/Punching.fbx',punch2:'./animations/Punching (1).fbx',elbow:'./animations/Elbow Punching.fbx',kick:'./animations/Kicking.fbx',groinKick:'./animations/Kick To The Groin.fbx',hitFace:'./animations/Receive Punch To The Face.fbx',hitHead:'./animations/Light Hit To Head.fbx'})){try{const src=await loadFBX(loader,file);const clip=src.animations[0]?.clone();if(clip){clip.name=combatName;removeRootDrift(clip);const act=this.mixer.clipAction(clip);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;this.actions[combatName]=act;}}catch(err){console.warn('Animação de combate não encontrada:',file);}}
     this.play('idle', 0);
     this.mixer.update(0); // já mostra a pose de descanso em vez da pose em T
     console.info('Y Bot pronto. Animações:', Object.keys(this.actions).join(', '));
@@ -685,6 +687,7 @@ class Player {
     this.currentAction = next;
   }
 
+  attack(kind){if(this.attackBusy||this.attackCooldown>0||!this.mixer)return false;const name=kind==="kick"?"kick":["punch","punch2","elbow"][this.attackSerial++%3];const act=this.actions[name];if(!act)return false;this.attackBusy=true;this.attackCooldown=.55;act.reset().setEffectiveWeight(1).play();if(this.currentAction)act.crossFadeFrom(this.currentAction,.08,false);this.currentAction=act;this.currentAnimName=name;setTimeout(()=>this.attackBusy=false,Math.max(500,(act.getClip().duration||.8)*1000));return true;}
   update(dt, input, cameraYaw) {
     const cfg = CONFIG.player;
     const forward = new THREE.Vector3(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
@@ -723,7 +726,7 @@ class Player {
     const groundY = this.world.getHeightAt(p.x, p.z);
     if (p.y <= groundY) { p.y = groundY; this.velocity.y = 0; this.onGround = true; }
     else this.onGround = false;
-    this.animate(dt, moving, input.isSprinting());
+    this.attackCooldown=Math.max(0,this.attackCooldown-dt);if(!this.attackBusy)this.animate(dt, moving, input.isSprinting());
   }
   animate(dt, moving, sprinting) {
     if (!this.mixer) return;
@@ -806,7 +809,7 @@ class RemotePlayers {
     root.add(visual);
     const mixer=new THREE.AnimationMixer(visual);
     const actions={};
-    for(const name of ['idle','walk','run','jump']) {
+    for(const name of ['idle','walk','run','jump','kick','punch','punch2','elbow','hitFace','hitHead']) {
       const sourceAction=this.game.player.actions[name];
       if(sourceAction) {
         const action=mixer.clipAction(sourceAction.getClip());
@@ -822,6 +825,7 @@ class RemotePlayers {
     this.peers.set(data.id,peer);
     return peer;
   }
+  playAttack(id,kind){const p=this.peers.get(String(id));if(!p)return;const act=p.actions[kind==='kick'?'kick':'hitFace'];if(act){act.reset().setEffectiveWeight(1).play();if(p.current)act.crossFadeFrom(p.current,.08,false);p.current=act;}}
   applySnapshot(players) {
     const seen=new Set();
     for(const data of players||[]) {
@@ -895,18 +899,19 @@ class Multiplayer {
       ws.addEventListener('message',(event)=>{
         let msg; try{msg=JSON.parse(event.data);}catch(_){return;}
         if(msg.type==='welcome') this.id=msg.id;
-        if(msg.type==='snapshot') this.remote.applySnapshot(msg.players);
+        if(msg.type==='snapshot') this.remote.applySnapshot(msg.players);if(msg.type==='damage'&&msg.target===this.id){this.game.player.hp=msg.hp;updateHealthUI(msg.hp);}if(msg.type==='attack')this.remote.playAttack(msg.id,msg.kind);
       });
       ws.addEventListener('close',()=>{this.connected=false;this.id=null;this.setStatus('OFFLINE');this.remote.applySnapshot([]);});
       ws.addEventListener('error',()=>this.setStatus('SEM SERVIDOR'));
     } catch(err) { this.setStatus('SEM SERVIDOR'); console.warn('Multiplayer:',err); }
   }
+  sendAttack(kind){if(this.connected&&this.socket&&this.socket.readyState===WebSocket.OPEN)this.socket.send(JSON.stringify({type:"attack",kind}));}
   sendState(now) {
     if(!this.connected || !this.socket || this.socket.readyState!==WebSocket.OPEN || now-this.lastSend<66) return;
     this.lastSend=now;
     const p=this.game.player;
     this.socket.send(JSON.stringify({type:'state',x:p.position.x,y:p.position.y,z:p.position.z,
-      rot:p.object.rotation.y,anim:p.currentAnimName||'idle'}));
+      rot:p.object.rotation.y,anim:p.currentAnimName||'idle',hp:p.hp}));
   }
 }
 
@@ -1000,6 +1005,7 @@ class Game {
       // Cursor livre é apenas um modo de controle, não significa que saiu do jogo.
       if (document.pointerLockElement === this.canvas && this.state !== 'playing') this.setState('playing');
     });
+    this.canvas.addEventListener('mousedown',e=>{if(e.button===0&&this.state==='playing'&&document.pointerLockElement===this.canvas){if(this.player.attack('punch'))this.multiplayer.sendAttack('punch');}});window.addEventListener('keydown',e=>{if(e.code==='KeyF'&&this.state==='playing'&&!e.repeat){if(this.player.attack('kick'))this.multiplayer.sendAttack('kick');}});document.getElementById('mobile-punch').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('punch'))this.multiplayer.sendAttack('punch');});document.getElementById('mobile-kick').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('kick'))this.multiplayer.sendAttack('kick');});
     this.canvas.addEventListener('click', () => {
       if (this.state === 'playing' && document.pointerLockElement !== this.canvas) this.tryLock();
     });
@@ -1070,6 +1076,7 @@ const bgProbe = new Image();
 bgProbe.onerror = () => document.getElementById('overlay').classList.add('sem-imagem');
 bgProbe.src = './menu-bg.png';
 
+function updateHealthUI(hp){const v=Math.max(0,Math.min(200,hp));const val=document.getElementById("hp-value"),bar=document.getElementById("hp-bar");if(val)val.textContent=v;if(bar){bar.style.width=(v/2)+"%";bar.style.background=v>100?"#38c66b":v>50?"#e5c642":"#e53b3b";}}
 const ui = new UI();
 const game = new Game(document.getElementById('app'), ui);
 game.start();
