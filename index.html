@@ -57,6 +57,16 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 @media(max-width:700px){.hud-help{display:none}.hud-title{top:8px;left:8px;font-size:11px}.hud-fps{top:8px;right:8px;font-size:11px}}
 .fullscreen-mobile{position:fixed;top:54px;right:12px;z-index:30;width:44px;height:44px;border:1px solid #ffffff70;border-radius:12px;background:#171022dd;color:#fff;font-size:28px;line-height:1;display:none;pointer-events:auto;touch-action:manipulation}html[data-device="mobile"] .fullscreen-mobile{display:block}html[data-device="mobile"] #mobile-controls{touch-action:none}html[data-device="mobile"] #mobile-camera-zone{touch-action:none;}
 </style>
+<script>
+(function(){
+ document.addEventListener('DOMContentLoaded',function(){
+  const play=document.getElementById('btn-play'),settings=document.getElementById('btn-settings'),panel=document.getElementById('settings-panel'),back=document.getElementById('btn-back');
+  if(play)play.addEventListener('click',function(){document.dispatchEvent(new Event('minecity-play-click'));});
+  if(settings)settings.addEventListener('click',function(){panel.classList.remove('hidden');});
+  if(back)back.addEventListener('click',function(){panel.classList.add('hidden');});
+ });
+})();
+</script>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
 </script>
@@ -1001,7 +1011,7 @@ class Game {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
-    this.ui.onPlay(() => this.requestPlay());
+    this.ui.onPlay(() => this.requestPlay());\n    document.addEventListener('minecity-play-click', () => this.requestPlay());
     this.ui.onResume(() => this.requestPlay());
     this.ui.onMainMenu(() => {
       if (document.pointerLockElement) document.exitPointerLock();
