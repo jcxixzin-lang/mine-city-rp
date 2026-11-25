@@ -1015,8 +1015,7 @@ class Game {
   setState(s) {
     this.state = s;
     this.input.setEnabled(s === 'playing');
-    if (s === 'playing') { this.ui.hideOverlay(); document.getElementById('phone-open').classList.remove('hidden'); } else { document.getElementById('phone-open').classList.add('hidden'); document.getElementById('phone').classList.add('hidden'); }
-    else this.ui.showOverlay(s);
+    if (s === 'playing') { this.ui.hideOverlay(); document.getElementById('phone-open').classList.remove('hidden'); } else { document.getElementById('phone-open').classList.add('hidden'); document.getElementById('phone').classList.add('hidden'); this.ui.showOverlay(s); }
   }
   start() {
     this.clock.start();
