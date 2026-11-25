@@ -68,7 +68,7 @@ wss.on('connection',(ws) => {
       const anim=['idle','walk','run','jump'].includes(msg.anim)?msg.anim:'idle';
       const old=players.get(id).state;
       old.x=n(msg.x); old.y=Math.max(-2,Math.min(30,n(msg.y))); old.z=n(msg.z);
-      old.rot=n(msg.rot); old.anim=anim; old.hp=200;
+      old.rot=n(msg.rot); old.anim=anim;
     }
     if(msg.type==='attack'&&players.has(id)){const now=Date.now(),last=attackCooldowns.get(id)||0;if(now-last<550)return;attackCooldowns.set(id,now);const kind=msg.kind==='kick'?'kick':'punch';const attacker=players.get(id).state;let target=null,best=2.2;for(const [otherId,p] of players){if(otherId===id)continue;const dist=Math.hypot(p.state.x-attacker.x,p.state.z-attacker.z);if(dist<best){best=dist;target={id:otherId,p};}}if(target){const damage=kind==='kick'?20:10+Math.floor(Math.random()*6);target.p.state.hp=Math.max(0,(target.p.state.hp??200)-damage);for(const client of wss.clients)if(client.readyState===WebSocket.OPEN)client.send(JSON.stringify({type:'damage',target:target.id,hp:target.p.state.hp,damage,from:id}));if(target.p.state.hp<=0){target.p.state.hp=200;target.p.state.x=12;target.p.state.z=12;target.p.state.y=0.2225;}}for(const client of wss.clients)if(client.readyState===WebSocket.OPEN)client.send(JSON.stringify({type:'attack',id,kind}));}
   });
