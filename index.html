@@ -1084,23 +1084,24 @@ phoneOpen.addEventListener('click',openPhone);document.getElementById('phone-clo
 async function toggleFullscreen(){try{if(document.fullscreenElement){await document.exitFullscreen();}else if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen();}}catch(err){console.warn('Tela cheia indisponível neste navegador:',err);}}
 document.getElementById('fullscreen-mobile').addEventListener('click',toggleFullscreen);
 window.addEventListener('keydown',e=>{if(e.code==='KeyT'&&!e.repeat&&game.state==='playing'&&phone.classList.contains('hidden')){e.preventDefault();toggleFullscreen();}});
-// Controles touch mobile: joystick, correr, pular e arrastar para girar câmera.
+// Controles mobile robustos com eventos touch nativos (Android), rearmados após o telefone.
 if(DEVICE_MODE==='mobile'){
- const controls=document.getElementById('mobile-controls'), base=document.getElementById('joy-base'),knob=document.getElementById('joy-knob'),run=document.getElementById('mobile-run'),jump=document.getElementById('mobile-jump'),cameraZone=document.getElementById('mobile-camera-zone');
+ const controls=document.getElementById('mobile-controls'),base=document.getElementById('joy-base'),knob=document.getElementById('joy-knob'),run=document.getElementById('mobile-run'),jump=document.getElementById('mobile-jump'),cameraZone=document.getElementById('mobile-camera-zone');
  controls.classList.remove('hidden');
- let joyId=null,camId=null,camLast={x:0,y:0},joyCenter={x:0,y:0};
- const updateJoy=e=>{const maxTravel=base.clientWidth*0.38;let dx=e.clientX-joyCenter.x,dy=e.clientY-joyCenter.y,len=Math.hypot(dx,dy);if(len>maxTravel&&len>0){dx*=maxTravel/len;dy*=maxTravel/len;}const ax=THREE.MathUtils.clamp(dx/maxTravel,-1,1),ay=THREE.MathUtils.clamp(-dy/maxTravel,-1,1);game.input.touchAxis={x:ax,y:ay};knob.style.left=(50+ax*42)+'%';knob.style.top=(50-ay*42)+'%';};
- base.addEventListener('pointerdown',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;game.input.touchActive=true;joyCenter={x:base.getBoundingClientRect().left+base.clientWidth/2,y:base.getBoundingClientRect().top+base.clientHeight/2};try{base.setPointerCapture(e.pointerId)}catch(_){}updateJoy(e);});
- base.addEventListener('pointermove',e=>{if(e.pointerId===joyId){e.preventDefault();updateJoy(e);}});
- const endJoy=e=>{if(e.pointerId!==joyId)return;joyId=null;game.input.touchAxis={x:0,y:0};game.input.touchActive=false;knob.style.left='50%';knob.style.top='50%';};
- base.addEventListener('pointerup',endJoy);base.addEventListener('pointercancel',endJoy);base.addEventListener('lostpointercapture',endJoy);
- run.addEventListener('pointerdown',e=>{e.preventDefault();game.input.touchSprint=true;run.setPointerCapture(e.pointerId);});const stopRun=()=>game.input.touchSprint=false;run.addEventListener('pointerup',stopRun);run.addEventListener('pointercancel',stopRun);run.addEventListener('lostpointercapture',stopRun);
- jump.addEventListener('pointerdown',e=>{e.preventDefault();if(game.state==='playing'&&phone.classList.contains('hidden'))game.input.jumpQueued=true;jump.setPointerCapture(e.pointerId);});
- cameraZone.addEventListener('pointerdown',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();camId=e.pointerId;camLast={x:e.clientX,y:e.clientY};try{cameraZone.setPointerCapture(e.pointerId)}catch(_){} });
- cameraZone.addEventListener('pointermove',e=>{if(e.pointerId!==camId)return;e.preventDefault();game.input.mouseDX+=(e.clientX-camLast.x)*2.0;game.input.mouseDY+=(e.clientY-camLast.y)*2.0;camLast={x:e.clientX,y:e.clientY};});
- const endCam=e=>{if(e.pointerId===camId)camId=null;};cameraZone.addEventListener('pointerup',endCam);cameraZone.addEventListener('pointercancel',endCam);
- const syncControls=()=>controls.classList.toggle('hidden',game.state!=='playing'||!phone.classList.contains('hidden')); 
- const oldSetState=game.setState.bind(game);game.setState=function(s){oldSetState(s);syncControls();}; 
+ let joyTouch=null,camTouch=null,runTouch=null,joyCenter={x:0,y:0},camLast={x:0,y:0};
+ const findTouch=(list,id)=>{for(const t of list)if(t.identifier===id)return t;return null;};
+ const resetJoy=()=>{joyTouch=null;game.input.touchAxis={x:0,y:0};game.input.touchActive=false;knob.style.left='50%';knob.style.top='50%';};
+ const resetCamera=()=>{camTouch=null;};
+ const updateJoy=t=>{const maxTravel=Math.max(25,base.clientWidth*.38);let dx=t.clientX-joyCenter.x,dy=t.clientY-joyCenter.y,len=Math.hypot(dx,dy);if(len>maxTravel&&len){dx*=maxTravel/len;dy*=maxTravel/len;}const ax=THREE.MathUtils.clamp(dx/maxTravel,-1,1),ay=THREE.MathUtils.clamp(-dy/maxTravel,-1,1);game.input.touchAxis={x:ax,y:ay};knob.style.left=(50+ax*42)+'%';knob.style.top=(50-ay*42)+'%';};
+ base.addEventListener('touchstart',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();if(joyTouch!==null)return;const t=e.changedTouches[0];joyTouch=t.identifier;joyCenter={x:base.getBoundingClientRect().left+base.clientWidth/2,y:base.getBoundingClientRect().top+base.clientHeight/2};game.input.touchActive=true;updateJoy(t);},{passive:false});
+ document.addEventListener('touchmove',e=>{if(joyTouch!==null){const t=findTouch(e.touches,joyTouch);if(t){e.preventDefault();updateJoy(t);}}if(camTouch!==null){const t=findTouch(e.touches,camTouch);if(t){e.preventDefault();game.input.mouseDX+=(t.clientX-camLast.x)*2.5;game.input.mouseDY+=(t.clientY-camLast.y)*2.5;camLast={x:t.clientX,y:t.clientY};}}},{passive:false});
+ const touchEnd=e=>{for(const t of e.changedTouches){if(t.identifier===joyTouch)resetJoy();if(t.identifier===camTouch)resetCamera();if(t.identifier===runTouch){runTouch=null;game.input.touchSprint=false;}}};
+ document.addEventListener('touchend',touchEnd,{passive:true});document.addEventListener('touchcancel',touchEnd,{passive:true});
+ run.addEventListener('touchstart',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();runTouch=e.changedTouches[0].identifier;game.input.touchSprint=true;},{passive:false});
+ jump.addEventListener('touchstart',e=>{e.preventDefault();if(game.state==='playing'&&phone.classList.contains('hidden'))game.input.jumpQueued=true;},{passive:false});
+ cameraZone.addEventListener('touchstart',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();const t=e.changedTouches[0];camTouch=t.identifier;camLast={x:t.clientX,y:t.clientY};},{passive:false});
+ const syncControls=()=>{const active=game.state==='playing'&&phone.classList.contains('hidden');controls.classList.toggle('hidden',!active);if(!active){resetJoy();resetCamera();runTouch=null;game.input.touchSprint=false;}};
+ const oldSetState=game.setState.bind(game);game.setState=function(s){oldSetState(s);syncControls();};
  const phoneObserver=new MutationObserver(syncControls);phoneObserver.observe(phone,{attributes:true,attributeFilter:['class']});syncControls();
 }
 window.minecity = { game }; // facilita testes no console (F12)
