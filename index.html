@@ -258,23 +258,44 @@ class World {
     g.rotation.x=-Math.PI/2; g.position.y=-0.035; this.scene.add(g);
   }
   buildRoadNetwork() {
-    // Rede urbana regular: eixos retos e espaçamento uniforme, sem ruas duplicadas.
+    // Cruzamentos compactos e alinhados. Calçadas interrompidas antes das interseções
+    // para não criarem quadrados de concreto sobre a pista.
     const coords=[-180,-120,-60,60,120,180], dashH=[],dashV=[],crossH=[],crossV=[];
+    const roadLen=410, roadWidth=14, sidewalkWidth=2.6, sidewalkOffset=8.6, gap=roadWidth+sidewalkWidth*2+1;
     for(const z of coords) {
-      this.addBox(410,.12,14,this.shared.asphalt,0,.02,z);
-      this.addBox(410,.08,1.1,this.shared.yellow,0,.095,z);
+      this.addBox(roadLen,.12,roadWidth,this.shared.asphalt,0,.02,z);
+      this.addBox(roadLen,.08,1.1,this.shared.yellow,0,.095,z);
       for(let x=-198;x<=198;x+=14) dashH.push([x,.105,z-4.5]);
-      for(const side of [-1,1]) this.addBox(410,.28,2.6,this.shared.sidewalk,0,.14,z+side*8.6);
+      // calçadas segmentadas, deixando abertura nos cruzamentos
+      let segStart=-205;
+      for(const ix of coords) {
+        const cutStart=ix-gap/2, cutEnd=ix+gap/2;
+        if(cutStart>segStart) {
+          const len=cutStart-segStart;
+          for(const side of [-1,1]) this.addBox(len,.28,sidewalkWidth,this.shared.sidewalk,(segStart+cutStart)/2,.14,z+side*sidewalkOffset);
+        }
+        segStart=cutEnd;
+      }
+      if(segStart<205) for(const side of [-1,1]) this.addBox(205-segStart,.28,sidewalkWidth,this.shared.sidewalk,(segStart+205)/2,.14,z+side*sidewalkOffset);
     }
     for(const x of coords) {
-      this.addBox(14,.12,410,this.shared.asphalt,x,.02,0);
-      this.addBox(1.1,.08,410,this.shared.yellow,x,.095,0);
+      this.addBox(roadWidth,.12,roadLen,this.shared.asphalt,x,.02,0);
+      this.addBox(1.1,.08,roadLen,this.shared.yellow,x,.095,0);
       for(let z=-198;z<=198;z+=14) dashV.push([x-4.5,.105,z]);
-      for(const side of [-1,1]) this.addBox(2.6,.28,410,this.shared.sidewalk,x+side*8.6,.14,0);
+      let segStart=-205;
+      for(const iz of coords) {
+        const cutStart=iz-gap/2, cutEnd=iz+gap/2;
+        if(cutStart>segStart) {
+          const len=cutStart-segStart;
+          for(const side of [-1,1]) this.addBox(sidewalkWidth,.28,len,this.shared.sidewalk,x+side*sidewalkOffset,.14,(segStart+cutStart)/2);
+        }
+        segStart=cutEnd;
+      }
+      if(segStart<205) for(const side of [-1,1]) this.addBox(sidewalkWidth,.28,205-segStart,this.shared.sidewalk,x+side*sidewalkOffset,.14,(segStart+205)/2);
     }
     this.addInstances(5,.025,.18,this.shared.white,dashH);
     this.addInstances(.18,.025,5,this.shared.white,dashV);
-    // Faixas apenas nos cruzamentos desta malha.
+    // Faixas simples nos cruzamentos.
     for(const x of coords) for(const z of coords) {
       for(let i=-3;i<=3;i++){crossH.push([x+i*1.7,.105,z-9.8]);crossV.push([x-9.8,.105,z+i*1.7,Math.PI/2]);}
     }
