@@ -687,7 +687,7 @@ class Player {
     this.currentAction = next;
   }
 
-  attack(kind){if(this.attackBusy||this.attackCooldown>0||!this.mixer)return false;const name=kind==="kick"?"kick":["punch","punch2","elbow"][this.attackSerial++%3];const act=this.actions[name];if(!act)return false;this.attackBusy=true;this.attackCooldown=.55;act.reset().setEffectiveWeight(1).play();if(this.currentAction)act.crossFadeFrom(this.currentAction,.08,false);this.currentAction=act;this.currentAnimName=name;setTimeout(()=>this.attackBusy=false,Math.max(500,(act.getClip().duration||.8)*1000));return true;}
+  attack(kind){if(this.attackBusy||this.attackCooldown>0||!this.mixer)return false;const name=kind==="kick"?"kick":["punch","punch2","elbow"][this.attackSerial++%3];const act=this.actions[name];if(!act)return false;this.attackBusy=true;this.attackCooldown=.55;act.stop();act.reset();act.enabled=true;act.setEffectiveWeight(1);act.setEffectiveTimeScale(1);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;act.play();if(this.currentAction&&this.currentAction!==act)act.crossFadeFrom(this.currentAction,.12,false);this.currentAction=act;this.currentAnimName=name;const duration=Math.max(1.1,act.getClip().duration||1.1);setTimeout(()=>{this.attackBusy=false;},duration*1000);return true;}
   update(dt, input, cameraYaw) {
     const cfg = CONFIG.player;
     const forward = new THREE.Vector3(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
