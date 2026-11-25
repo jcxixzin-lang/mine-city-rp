@@ -966,6 +966,8 @@ class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(this.renderer.domElement);
     this.canvas = this.renderer.domElement;
+    this.canvas.tabIndex = 0;
+    this.canvas.style.outline = 'none';
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(CONFIG.world.skyColor);
