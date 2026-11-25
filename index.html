@@ -185,14 +185,16 @@ class Input {
     this.touchAxis={x:0,y:0}; this.touchSprint=false;
     const prevent = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
+    // Captura teclas na fase de captura para não depender do foco do canvas.
     window.addEventListener('keydown', (e) => {
-      if (!this.enabled) return;
-      if (prevent.has(e.code)) e.preventDefault();
+      if (!this.enabled || document.getElementById('phone')?.classList.contains('hidden') === false) return;
+      if (prevent.has(e.code) || ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(e.code)) e.preventDefault();
       if (e.code === 'Space' && !e.repeat) this.jumpQueued = true;
       this.keys.add(e.code);
-    });
-    window.addEventListener('keyup', (e) => this.keys.delete(e.code));
+    }, true);
+    window.addEventListener('keyup', (e) => { this.keys.delete(e.code); }, true);
     window.addEventListener('blur', () => this.reset());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.reset(); });
     lockElement.addEventListener('mousedown', (e) => { if (e.button === 0) this.dragging = true; });
     window.addEventListener('mouseup', () => { this.dragging = false; });
     window.addEventListener('mousemove', (e) => {
@@ -1003,8 +1005,12 @@ class Game {
       if (document.pointerLockElement === this.canvas && this.state !== 'playing') this.setState('playing');
     });
     this.canvas.addEventListener('click', () => {
-      if (this.state === 'playing' && document.pointerLockElement !== this.canvas) this.tryLock();
+      if (this.state === 'playing') {
+        this.canvas.focus();
+        if (document.pointerLockElement !== this.canvas) this.tryLock();
+      }
     });
+    // Reativa foco no canvas ao iniciar/resumir sem exigir clique em WASD.
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Escape' && this.state === 'playing') {
         if (document.pointerLockElement) document.exitPointerLock();
@@ -1041,7 +1047,7 @@ class Game {
   setState(s) {
     this.state = s;
     this.input.setEnabled(s === 'playing');
-    if (s === 'playing') { this.ui.hideOverlay(); document.getElementById('phone-open').classList.remove('hidden'); } else { document.getElementById('phone-open').classList.add('hidden'); document.getElementById('phone').classList.add('hidden'); this.ui.showOverlay(s); }
+    if (s === 'playing') { this.canvas.focus(); this.ui.hideOverlay(); document.getElementById('phone-open').classList.remove('hidden'); } else { document.getElementById('phone-open').classList.add('hidden'); document.getElementById('phone').classList.add('hidden'); this.ui.showOverlay(s); }
   }
   start() {
     this.clock.start();
