@@ -1137,7 +1137,7 @@ function initBuilder(){
  canvas.addEventListener('pointerdown',e=>{if(e.button===2||e.button===1){bOrbit=true;bLast={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});
  canvas.addEventListener('pointermove',e=>{if(bOrbit){bYaw-=(e.clientX-bLast.x)*.008;bPitch=Math.max(.12,Math.min(1.48,bPitch+(e.clientY-bLast.y)*.008));bLast={x:e.clientX,y:e.clientY};}});
  canvas.addEventListener('pointerup',()=>bOrbit=false);canvas.addEventListener('pointercancel',()=>bOrbit=false);canvas.addEventListener('contextmenu',e=>e.preventDefault());
- canvas.addEventListener('wheel',e=>{e.preventDefault();if(e.shiftKey&&bSelected){let f=e.deltaY>0?.92:1.08;bSelected.scale.multiplyScalar(f);}else bDist=Math.max(5,Math.min(120,bDist+e.deltaY*.04));},{passive:false});
+ canvas.addEventListener('wheel',e=>{e.preventDefault();if(e.shiftKey&&bSelected){let f=e.deltaY>0 ? 0.92 : 1.08;bSelected.scale.multiplyScalar(f);}else bDist=Math.max(5,Math.min(120,bDist+e.deltaY*.04));},{passive:false});
  canvas.addEventListener('click',e=>{if(bOrbit||bTransform.dragging)return;cast(e);let hits=ray.intersectObjects(bObjects,true);if(hits.length){let root=hits[0].object;while(root.parent&&root.parent!==bScene)root=root.parent;bSelected=root;bTransform.attach(root);return;}let hit=ray.intersectObject(bGround);if(hit.length&&bSource&&bMode==='place'){const obj=cloneSkeleton(bSource);obj.position.copy(hit[0].point);bScene.add(obj);bObjects.push(obj);bSelected=obj;bTransform.attach(obj);}});
  function animate(){requestAnimationFrame(animate);bCamera.position.set(bTarget.x+bDist*Math.sin(bYaw)*Math.cos(bPitch),bTarget.y+bDist*Math.sin(bPitch),bTarget.z+bDist*Math.cos(bYaw)*Math.cos(bPitch));bCamera.lookAt(bTarget);bRenderer.render(bScene,bCamera);}animate();
 }
