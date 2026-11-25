@@ -59,7 +59,7 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 <div id="city-intro" class="city-intro hidden"><div class="intro-kicker">VOCÊ ESTÁ CHEGANDO EM</div><div class="intro-city">MINE CITY</div><div class="intro-sub">RIO DE JANEIRO · BRASIL</div></div>
 
 <div id="hud" class="hud hidden">
-  <div class="hud-title"><span class="hud-badge">MINE CITY RP</span><span id="hud-project-name"></span></div>
+  <div class="hud-title"><span class="hud-badge">MINE CITY RP</span><span id="device-badge" class="hud-badge" style="background:#176b43">PC</span><span id="hud-project-name"></span></div>
   <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div>
   <div class="hud-help">
     <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</span>
@@ -136,6 +136,25 @@ const CONFIG = {
     fade: 0.2, jumpFade: 0.08,
   },
 };
+
+// Detecta a plataforma para selecionar controles e otimizações apropriadas.
+function detectDeviceMode() {
+  const ua = navigator.userAgent || '';
+  const mobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua) ||
+    (navigator.userAgentData && navigator.userAgentData.mobile === true);
+  const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  // Dispositivos com touch e UA mobile são MOBILE; touchscreen de PC não troca o modo sozinho.
+  return mobileUA && touch ? 'mobile' : 'pc';
+}
+const DEVICE_MODE = detectDeviceMode();
+document.documentElement.dataset.device = DEVICE_MODE;
+document.body.dataset.device = DEVICE_MODE;
+const deviceBadge = document.getElementById('device-badge');
+if (deviceBadge) {
+  deviceBadge.textContent = DEVICE_MODE === 'mobile' ? 'MOBILE' : 'PC';
+  deviceBadge.style.background = DEVICE_MODE === 'mobile' ? '#7b2cbf' : '#176b43';
+}
+window.MINECITY_DEVICE_MODE = DEVICE_MODE;
 
 const damp = (sharpness, dt) => 1 - Math.exp(-sharpness * dt);
 function shortestAngle(from, to) {
