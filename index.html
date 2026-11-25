@@ -185,14 +185,25 @@ class Input {
     this.touchAxis={x:0,y:0}; this.touchSprint=false;
     const prevent = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
-    // Captura teclas na fase de captura para não depender do foco do canvas.
-    window.addEventListener('keydown', (e) => {
+    // Captura teclado global e normaliza teclas, independentemente do foco do canvas.
+    const keyCode = (e) => {
+      const keyMap = {w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',W:'KeyW',A:'KeyA',S:'KeyS',D:'KeyD',
+        ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight',
+        ' ':'Space',Shift:'ShiftLeft'};
+      return keyMap[e.key] || e.code;
+    };
+    const down = (e) => {
       if (!this.enabled || document.getElementById('phone')?.classList.contains('hidden') === false) return;
-      if (prevent.has(e.code) || ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(e.code)) e.preventDefault();
-      if (e.code === 'Space' && !e.repeat) this.jumpQueued = true;
-      this.keys.add(e.code);
-    }, true);
-    window.addEventListener('keyup', (e) => { this.keys.delete(e.code); }, true);
+      const code = keyCode(e);
+      if (prevent.has(code) || ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(code)) e.preventDefault();
+      if (code === 'Space' && !e.repeat) this.jumpQueued = true;
+      this.keys.add(code);
+    };
+    const up = (e) => { this.keys.delete(keyCode(e)); };
+    window.addEventListener('keydown', down, {capture:true});
+    document.addEventListener('keydown', down, {capture:true});
+    window.addEventListener('keyup', up, {capture:true});
+    document.addEventListener('keyup', up, {capture:true});
     window.addEventListener('blur', () => this.reset());
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.reset(); });
     lockElement.addEventListener('mousedown', (e) => { if (e.button === 0) this.dragging = true; });
