@@ -22,6 +22,6 @@
     "productName": "Mine City RP",
     "directories": { "output": "dist" },
     "win": { "target": "nsis" },
-    "nsis": { "oneClick": true, "allowToChangeInstallationDirectory": true }
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
   }
 }
