@@ -22,11 +22,12 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 .city-intro.hidden{display:none!important}.intro-kicker{font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.48em;font-weight:700;color:#e5e3dc;text-shadow:0 2px 8px #000;animation:introRise .8s both}.intro-city{margin:.12em 0;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(3.5rem,12vw,9rem);font-weight:900;letter-spacing:.08em;color:#d0d0c9;-webkit-text-stroke:2px #777a78;text-shadow:0 3px 0 #777,0 6px 0 #555,0 12px 22px rgba(0,0,0,.9);animation:introRise 1s .15s both}.intro-sub{font-size:clamp(.65rem,1.2vw,.95rem);letter-spacing:.35em;color:#fff;text-shadow:0 2px 8px #000;animation:introRise 1s .3s both}@keyframes introFade{0%,72%{opacity:1}100%{opacity:0}}@keyframes introRise{from{opacity:0;transform:translateY(24px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 
 .overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:0;background:#160027 url("./menu-bg.png") center center / 100% 100% no-repeat}
-.menu-buttons{position:absolute;inset:0;z-index:26;pointer-events:none}
-.menu-hitbox{position:absolute;left:50%;transform:translateX(-50%);width:min(360px,80vw);height:64px;border:2px solid #c36aff;border-radius:16px;background:linear-gradient(135deg,#8200d9,#41006f);color:#fff;font-size:20px;font-weight:900;letter-spacing:.1em;cursor:pointer;pointer-events:auto;box-shadow:0 5px 25px #0008}
-.menu-hitbox:hover{filter:brightness(1.2)}
-#btn-play{top:60%}#btn-play::after{content:'JOGAR'}
-#btn-settings{top:70%}#btn-settings::after{content:'CONFIGURAÇÕES'}
+.menu-buttons{position:absolute;inset:0}
+.menu-hitbox{position:absolute;left:37.2%;width:25.6%;height:7.1%;border:0;border-radius:12px;background:transparent;cursor:pointer;transition:background .18s,box-shadow .18s,transform .18s}
+.menu-hitbox:hover,.menu-hitbox:focus-visible{background:rgba(170,35,255,.23);box-shadow:0 0 22px rgba(190,50,255,.8);outline:2px solid rgba(255,255,255,.65);outline-offset:2px}
+.menu-hitbox:active{transform:scale(.98)}
+#btn-play{top:64.6%}
+#btn-settings{top:72.5%}
 .settings-panel{position:absolute;inset:0;display:grid;place-items:center;padding:1rem;background:rgba(8,0,20,.82);backdrop-filter:blur(8px);z-index:30}
 .settings-box{width:min(390px,92vw);padding:30px;text-align:center;background:rgba(23,8,42,.97);border:2px solid #a52bff;border-radius:16px;box-shadow:0 0 35px rgba(153,0,255,.35)}
 .settings-box h2{margin:0 0 12px;color:#d69aff;letter-spacing:.08em}
@@ -53,38 +54,28 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 #mobile-controls.hidden{display:none!important}.joy-base{position:absolute;left:22px;bottom:28px;width:142px;height:142px;border-radius:50%;background:rgba(20,20,30,.38);border:2px solid rgba(255,255,255,.45);pointer-events:auto;touch-action:none}
 #joy-knob{position:absolute;left:50%;top:50%;width:62px;height:62px;border-radius:50%;transform:translate(-50%,-50%);background:rgba(170,65,255,.82);border:2px solid #fff;box-shadow:0 0 16px #9b42d6}
 .mobile-action{position:absolute;right:24px;border:2px solid rgba(255,255,255,.65);border-radius:50%;color:#fff;font-weight:900;background:rgba(90,30,150,.68);width:72px;height:72px;pointer-events:auto;touch-action:none;box-shadow:0 4px 14px #0006}
-#mobile-jump{bottom:32px;width:82px;height:82px;font-size:16px}#mobile-punch,#mobile-kick{display:none!important}@media(max-width:700px){#mobile-punch,#mobile-kick{display:block!important}}#mobile-run{bottom:125px;right:28px}#mobile-camera-zone{position:absolute;right:0;top:15%;width:58%;height:65%;pointer-events:auto;touch-action:none}
+#mobile-jump{bottom:32px;width:82px;height:82px;font-size:16px}#mobile-run{bottom:125px;right:28px}#mobile-camera-zone{position:absolute;right:0;top:15%;width:58%;height:65%;pointer-events:auto;touch-action:none}
 @media(max-width:700px){.hud-help{display:none}.hud-title{top:8px;left:8px;font-size:11px}.hud-fps{top:8px;right:8px;font-size:11px}}
 .fullscreen-mobile{position:fixed;top:54px;right:12px;z-index:30;width:44px;height:44px;border:1px solid #ffffff70;border-radius:12px;background:#171022dd;color:#fff;font-size:28px;line-height:1;display:none;pointer-events:auto;touch-action:manipulation}html[data-device="mobile"] .fullscreen-mobile{display:block}html[data-device="mobile"] #mobile-controls{touch-action:none}html[data-device="mobile"] #mobile-camera-zone{touch-action:none;}
 </style>
-<script>
-(function(){
- document.addEventListener('DOMContentLoaded',function(){
-  const play=document.getElementById('btn-play'),settings=document.getElementById('btn-settings'),panel=document.getElementById('settings-panel'),back=document.getElementById('btn-back');
-  if(play)play.addEventListener('click',function(){document.dispatchEvent(new Event('minecity-play-click'));});
-  if(settings)settings.addEventListener('click',function(){panel.classList.remove('hidden');});
-  if(back)back.addEventListener('click',function(){panel.classList.add('hidden');});
- });
-})();
-</script>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
 </script>
 </head>
 <body>
-<div id="app"></div><div id="mobile-controls" class="hidden"><div id="mobile-camera-zone"></div><div id="joy-base" class="joy-base"><div id="joy-knob"></div></div><button id="mobile-run" class="mobile-action" type="button">CORRER</button><button id="mobile-jump" class="mobile-action" type="button">PULAR</button></div><button id="mobile-punch" class="mobile-action" style="right:110px;bottom:32px" type="button">SOCO</button><button id="mobile-kick" class="mobile-action" style="right:110px;bottom:120px" type="button">CHUTE</button><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><button id="fullscreen-mobile" class="fullscreen-mobile" type="button" aria-label="Tela cheia" title="Tela cheia">⛶</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
+<div id="app"></div><div id="mobile-controls" class="hidden"><div id="mobile-camera-zone"></div><div id="joy-base" class="joy-base"><div id="joy-knob"></div></div><button id="mobile-run" class="mobile-action" type="button">CORRER</button><button id="mobile-jump" class="mobile-action" type="button">PULAR</button></div><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><button id="fullscreen-mobile" class="fullscreen-mobile" type="button" aria-label="Tela cheia" title="Tela cheia">⛶</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
 
 <div id="city-intro" class="city-intro hidden"><div class="intro-kicker">VOCÊ ESTÁ CHEGANDO EM</div><div class="intro-city">MINE CITY</div><div class="intro-sub">RIO DE JANEIRO · BRASIL</div></div>
 
 <div id="hud" class="hud hidden">
   <div class="hud-title"><span class="hud-badge">MINE CITY RP</span><span id="device-badge" class="hud-badge" style="background:#176b43">PC</span><span id="hud-project-name"></span></div>
-  <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div><div style="position:absolute;top:70px;left:18px;background:#15151dcc;padding:10px;border-radius:12px;width:220px"><b>VIDA <span id="hp-value">200</span>/200</b><div style="height:12px;background:#552222;border-radius:8px;margin-top:5px;overflow:hidden"><div id="hp-bar" style="height:100%;width:100%;background:#38c66b"></div></div></div>
+  <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div>
   <div class="hud-help">
     <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</span>
     <span><kbd>E</kbd> celular</span><span><kbd>Espaço</kbd> pular</span>
     <span><kbd>Shift</kbd> correr</span>
     <span><kbd>Mouse</kbd> câmera</span>
-    <span><kbd>F</kbd> chute</span><span><kbd>Mouse</kbd> soco</span><span><kbd>Esc</kbd> pausar</span>
+    <span><kbd>Esc</kbd> pausar</span>
   </div>
 </div>
 
@@ -115,8 +106,7 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 
 <!-- Arquivos .fbx embutidos (gerado por tools/embutir-assets.py): faz o jogo funcionar com duplo clique -->
 <script src="./assets-embutidos.js"></script>
-<script src="./server-config.js"></script>
-<script type="module">
+<script src="./server-config.js"></script>\n<script type="module">
 import * as THREE from 'three';
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FBXLoader.js';
 import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FontLoader.js';
@@ -599,7 +589,7 @@ class Player {
     this.object.rotation.y = this.facing;
     this.mixer = null;
     this.actions = {};
-    this.currentAction = null; this.hp=200; this.attackBusy=false; this.attackCooldown=0; this.attackSerial=0;
+    this.currentAction = null;
     this.loadCharacter();
   }
   get position() { return this.object.position; }
@@ -634,7 +624,6 @@ class Player {
       }
     }
     if (missing.length) showWarning('Algumas animações não carregaram: ' + missing.join(', ') + '.');
-    for(const [combatName,file] of Object.entries({punch:'./animations/Punching (1).fbx',punch2:'./animations/Punching (1).fbx',elbow:'./animations/Elbow Punching.fbx',kick:'./animations/Kicking.fbx',groinKick:'./animations/Kick To The Groin.fbx',hitFace:'./animations/Receive Punch To The Face.fbx',hitHead:'./animations/Light Hit To Head.fbx'})){try{const src=await loadFBX(loader,file);const clip=src.animations[0]?.clone();if(clip){clip.name=combatName;removeRootDrift(clip);const act=this.mixer.clipAction(clip);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;this.actions[combatName]=act;}}catch(err){console.warn('Animação de combate não encontrada:',file);}}
     this.play('idle', 0);
     this.mixer.update(0); // já mostra a pose de descanso em vez da pose em T
     console.info('Y Bot pronto. Animações:', Object.keys(this.actions).join(', '));
@@ -696,7 +685,6 @@ class Player {
     this.currentAction = next;
   }
 
-  attack(kind){if(this.attackBusy||this.attackCooldown>0||!this.mixer)return false;const name=kind==="kick"?"kick":["punch","punch2","elbow"][this.attackSerial++%3];const act=this.actions[name];if(!act)return false;this.attackBusy=true;this.attackCooldown=.55;act.stop();act.reset();act.enabled=true;act.setEffectiveWeight(1);act.setEffectiveTimeScale(1);act.setLoop(THREE.LoopOnce,1);act.clampWhenFinished=true;act.play();if(this.currentAction&&this.currentAction!==act)act.crossFadeFrom(this.currentAction,.12,false);this.currentAction=act;this.currentAnimName=name;const duration=Math.max(1.1,act.getClip().duration||1.1);setTimeout(()=>{this.attackBusy=false;},duration*1000);return true;}
   update(dt, input, cameraYaw) {
     const cfg = CONFIG.player;
     const forward = new THREE.Vector3(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
@@ -735,7 +723,7 @@ class Player {
     const groundY = this.world.getHeightAt(p.x, p.z);
     if (p.y <= groundY) { p.y = groundY; this.velocity.y = 0; this.onGround = true; }
     else this.onGround = false;
-    this.attackCooldown=Math.max(0,this.attackCooldown-dt);if(!this.attackBusy)this.animate(dt, moving, input.isSprinting());else if(this.mixer)this.mixer.update(dt);
+    this.animate(dt, moving, input.isSprinting());
   }
   animate(dt, moving, sprinting) {
     if (!this.mixer) return;
@@ -751,17 +739,6 @@ class Player {
     else if (a && a === this.actions.run) a.timeScale = clamp(speed / c.runRefSpeed, 0.6, 1.8);
     this.mixer.update(dt);
   }
-}
-
-
-/* BOT DE TREINO: NPC local que persegue, ataca e recebe golpes */
-class TrainingBot {
- constructor(game){this.game=game;this.root=new THREE.Group();this.mixer=null;this.actions={};this.current=null;this.hp=200;this.cooldown=1.4;this.busy=false;this.ready=false;this.root.position.set(14,0.2225,14);game.scene.add(this.root);this.hud=document.createElement('div');this.hud.style.cssText='position:fixed;top:70px;right:18px;width:220px;padding:10px;border-radius:12px;background:#15151dcc;color:white;z-index:6;font: bold 14px system-ui;pointer-events:none';this.hud.innerHTML='BOT DE TREINO <span id="bot-hp">200</span>/200<div style="height:12px;background:#552222;border-radius:8px;margin-top:5px;overflow:hidden"><div id="bot-bar" style="height:100%;width:100%;background:#38c66b"></div></div>';document.body.appendChild(this.hud);}
- setup(){const p=this.game.player;if(!p.mixer||!p.visual.children.length||this.ready)return;const model=cloneSkeleton(p.visual.children[0]);this.root.add(model);this.mixer=new THREE.AnimationMixer(model);for(const n of ['idle','walk','run','punch','punch2','elbow','kick','hitFace','hitHead']){const src=p.actions[n];if(src){const a=this.mixer.clipAction(src.getClip());a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;this.actions[n]=a;}}this.play('idle');this.ready=true;}
- play(n){const a=this.actions[n]||this.actions.idle;if(!a)return;if(this.current===a&&a.isRunning())return;a.reset();a.enabled=true;a.setEffectiveWeight(1);a.setEffectiveTimeScale(1);a.play();if(this.current&&this.current!==a)a.crossFadeFrom(this.current,.12,false);this.current=a;this.busy=['punch','kick','hitFace','hitHead','punch2','elbow'].includes(n);if(this.busy)setTimeout(()=>this.busy=false,Math.max(650,(a.getClip().duration||.8)*1000));}
- receiveAttack(kind){if(!this.ready)return;const dist=this.root.position.distanceTo(this.game.player.position);if(dist>2.65)return;this.hp=Math.max(0,this.hp-(kind==='kick'?20:10+Math.floor(Math.random()*6)));this.play(Math.random()<.5?'hitFace':'hitHead');this.updateHud();if(this.hp<=0){this.hp=200;this.root.position.set(this.game.player.position.x+2.5,0.2225,this.game.player.position.z+1.5);this.updateHud();}}
- updateHud(){const v=document.getElementById('bot-hp'),b=document.getElementById('bot-bar');if(v)v.textContent=this.hp;if(b){b.style.width=(this.hp/2)+'%';b.style.background=this.hp>100?'#38c66b':this.hp>50?'#e5c642':'#e53b3b';}}
- update(dt){this.setup();if(!this.ready)return;const p=this.game.player,dx=p.position.x-this.root.position.x,dz=p.position.z-this.root.position.z,dist=Math.hypot(dx,dz);this.cooldown=Math.max(0,this.cooldown-dt);if(dist>1.65&&!this.busy){const step=Math.min(dt*1.25,dist-1.35);this.root.position.x+=dx/dist*step;this.root.position.z+=dz/dist*step;this.root.rotation.y=Math.atan2(dx,dz);this.play('walk');}else if(dist<=1.8&&!this.busy&&this.cooldown<=0){this.cooldown=1.8;this.root.rotation.y=Math.atan2(dx,dz);this.play(Math.random()<.75?'punch':'kick');p.hp=Math.max(0,p.hp-(this.current&&this.current.getClip().name==='kick'?20:10));updateHealthUI(p.hp);if(p.hp<=0){p.hp=200;p.position.set(...CONFIG.player.startPosition);updateHealthUI(200);}}else if(!this.busy&&dist>=1.8)this.play('idle');this.mixer.update(dt);}
 }
 
 /* ============ CÂMERA EM TERCEIRA PESSOA ============ */
@@ -829,7 +806,7 @@ class RemotePlayers {
     root.add(visual);
     const mixer=new THREE.AnimationMixer(visual);
     const actions={};
-    for(const name of ['idle','walk','run','jump','kick','punch','punch2','elbow','hitFace','hitHead']) {
+    for(const name of ['idle','walk','run','jump']) {
       const sourceAction=this.game.player.actions[name];
       if(sourceAction) {
         const action=mixer.clipAction(sourceAction.getClip());
@@ -845,7 +822,6 @@ class RemotePlayers {
     this.peers.set(data.id,peer);
     return peer;
   }
-  playAttack(id,kind){const p=this.peers.get(String(id));if(!p)return;const act=p.actions[kind==='kick'?'kick':['punch','punch2','elbow'][Math.floor(Math.random()*3)]];if(act){act.reset().setEffectiveWeight(1).play();if(p.current)act.crossFadeFrom(p.current,.08,false);p.current=act;}}
   applySnapshot(players) {
     const seen=new Set();
     for(const data of players||[]) {
@@ -919,19 +895,18 @@ class Multiplayer {
       ws.addEventListener('message',(event)=>{
         let msg; try{msg=JSON.parse(event.data);}catch(_){return;}
         if(msg.type==='welcome') this.id=msg.id;
-        if(msg.type==='snapshot') this.remote.applySnapshot(msg.players);if(msg.type==='damage'&&msg.target===this.id){this.game.player.hp=msg.hp;updateHealthUI(msg.hp);}if(msg.type==='attack')this.remote.playAttack(msg.id,msg.kind);
+        if(msg.type==='snapshot') this.remote.applySnapshot(msg.players);
       });
       ws.addEventListener('close',()=>{this.connected=false;this.id=null;this.setStatus('OFFLINE');this.remote.applySnapshot([]);});
       ws.addEventListener('error',()=>this.setStatus('SEM SERVIDOR'));
     } catch(err) { this.setStatus('SEM SERVIDOR'); console.warn('Multiplayer:',err); }
   }
-  sendAttack(kind){if(this.connected&&this.socket&&this.socket.readyState===WebSocket.OPEN)this.socket.send(JSON.stringify({type:"attack",kind}));}
   sendState(now) {
     if(!this.connected || !this.socket || this.socket.readyState!==WebSocket.OPEN || now-this.lastSend<66) return;
     this.lastSend=now;
     const p=this.game.player;
     this.socket.send(JSON.stringify({type:'state',x:p.position.x,y:p.position.y,z:p.position.z,
-      rot:p.object.rotation.y,anim:p.currentAnimName||'idle',hp:p.hp}));
+      rot:p.object.rotation.y,anim:p.currentAnimName||'idle'}));
   }
 }
 
@@ -949,8 +924,12 @@ class UI {
     document.title = CONFIG.projectName;
     $('hud-project-name').textContent = CONFIG.projectName;
 
-    this.settingsBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.settingsPanel.classList.remove('hidden'); });
-    $('btn-back').onclick = () => { this.settingsPanel.classList.add('hidden'); };
+    this.settingsBtn.addEventListener('click', () => {
+      this.settingsPanel.classList.remove('hidden');
+    });
+    $('btn-back').addEventListener('click', () => {
+      this.settingsPanel.classList.add('hidden');
+    });
     $('btn-resume').addEventListener('click', () => {
       if (this.resumeCallback) this.resumeCallback();
     });
@@ -958,7 +937,7 @@ class UI {
       if (this.menuCallback) this.menuCallback();
     });
   }
-  onPlay(cb) { this.playBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); cb(); }); }
+  onPlay(cb) { this.playBtn.addEventListener('click', cb); }
   onResume(cb) { this.resumeCallback = cb; }
   onMainMenu(cb) { this.menuCallback = cb; }
   showOverlay(mode) {
@@ -1000,7 +979,6 @@ class Game {
     this.scene.add(this.player.object);
     this.cameraRig = new ThirdPersonCamera(this.camera, this.player);
     this.multiplayer = new Multiplayer(this);
-    this.trainingBot = new TrainingBot(this);
     this.clock = new THREE.Clock();
     this.fpsFrames = 0; this.fpsTime = 0;
     this.bindEvents();
@@ -1013,7 +991,6 @@ class Game {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
     this.ui.onPlay(() => this.requestPlay());
-    document.addEventListener('minecity-play-click', () => this.requestPlay());
     this.ui.onResume(() => this.requestPlay());
     this.ui.onMainMenu(() => {
       if (document.pointerLockElement) document.exitPointerLock();
@@ -1023,7 +1000,6 @@ class Game {
       // Cursor livre é apenas um modo de controle, não significa que saiu do jogo.
       if (document.pointerLockElement === this.canvas && this.state !== 'playing') this.setState('playing');
     });
-    this.canvas.addEventListener('mousedown',e=>{if(e.button===0&&this.state==='playing'&&document.pointerLockElement===this.canvas){if(this.player.attack('punch')){this.multiplayer.sendAttack('punch');this.trainingBot.receiveAttack('punch');}}});window.addEventListener('keydown',e=>{if(e.code==='KeyF'&&this.state==='playing'&&!e.repeat){if(this.player.attack('kick')){this.multiplayer.sendAttack('kick');this.trainingBot.receiveAttack('kick');}}});document.getElementById('mobile-punch').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('punch')){this.multiplayer.sendAttack('punch');this.trainingBot.receiveAttack('punch');}});document.getElementById('mobile-kick').addEventListener('click',()=>{if(this.state==='playing'&&this.player.attack('kick')){this.multiplayer.sendAttack('kick');this.trainingBot.receiveAttack('kick');}});
     this.canvas.addEventListener('click', () => {
       if (this.state === 'playing' && document.pointerLockElement !== this.canvas) this.tryLock();
     });
@@ -1078,7 +1054,6 @@ class Game {
       this.multiplayer.sendState(performance.now());
     }
     this.multiplayer.remote.update(dt);
-    if (this.state === 'playing') this.trainingBot.update(dt);
     if (!this.multiplayer.remote.sourceModel && this.player.visual.children.length) this.multiplayer.remote.setSource(this.player.visual.children[0]);
     this.world.update(this.player.position);
     this.renderer.render(this.scene, this.camera);
@@ -1095,7 +1070,6 @@ const bgProbe = new Image();
 bgProbe.onerror = () => document.getElementById('overlay').classList.add('sem-imagem');
 bgProbe.src = './menu-bg.png';
 
-function updateHealthUI(hp){const v=Math.max(0,Math.min(200,hp));const val=document.getElementById("hp-value"),bar=document.getElementById("hp-bar");if(val)val.textContent=v;if(bar){bar.style.width=(v/2)+"%";bar.style.background=v>100?"#38c66b":v>50?"#e5c642":"#e53b3b";}}
 const ui = new UI();
 const game = new Game(document.getElementById('app'), ui);
 game.start();
