@@ -86,7 +86,8 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 </div>
 
 <button id="builder-launch" type="button">🏗️ CONSTRUTOR DA CIDADE</button>
-<div id="builder" class="hidden"><div class="builder-head"><h2>🏗️ CONSTRUTOR — MINE CITY</h2><div><button id="builder-save">EXPORTAR MAPA</button> <button id="builder-exit">VOLTAR AO JOGO</button></div></div><div class="builder-body"><aside class="builder-sidebar"><h3>Biblioteca de assets</h3><p>Importe modelos 3D .GLB/.GLTF que você baixou. Depois clique no chão para posicionar.</p><label>📦 IMPORTAR MODELOS (.glb/.gltf)<input id="builder-files" type="file" accept=".glb,.gltf" multiple></label><div id="builder-assets"></div><hr><h3>Terreno</h3><button id="builder-grass">🌱 Pintar terreno (verde)</button><button id="builder-road">🛣️ Colocar rua</button><button id="builder-delete">🗑️ Apagar objeto</button><button id="builder-clear">🧹 Limpar objetos</button><p class="builder-info">Poly Haven e ambientCG são fontes de assets. Baixe modelos/arquivos e importe aqui. GLB funciona melhor. Texturas ambientCG são materiais, normalmente precisam ser aplicadas ao terreno/material.</p><a href="https://polyhaven.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir Poly Haven</a><br><a href="https://ambientcg.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir ambientCG</a></aside><div class="builder-stage"><canvas id="builder-canvas"></canvas></div></div></div>\n<div id="overlay" class="overlay">
+<div id="builder" class="hidden"><div class="builder-head"><h2>🏗️ CONSTRUTOR — MINE CITY</h2><div><button id="builder-save">EXPORTAR MAPA</button> <button id="builder-exit">VOLTAR AO JOGO</button></div></div><div class="builder-body"><aside class="builder-sidebar"><h3>Biblioteca de assets</h3><p>Importe modelos 3D .GLB/.GLTF que você baixou. Depois clique no chão para posicionar.</p><label>📦 IMPORTAR MODELOS (.glb/.gltf)<input id="builder-files" type="file" accept=".glb,.gltf" multiple></label><div id="builder-assets"></div><hr><h3>Terreno</h3><button id="builder-grass">🌱 Pintar terreno (verde)</button><button id="builder-road">🛣️ Colocar rua</button><button id="builder-delete">🗑️ Apagar objeto</button><button id="builder-clear">🧹 Limpar objetos</button><p class="builder-info">Poly Haven e ambientCG são fontes de assets. Baixe modelos/arquivos e importe aqui. GLB funciona melhor. Texturas ambientCG são materiais, normalmente precisam ser aplicadas ao terreno/material.</p><a href="https://polyhaven.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir Poly Haven</a><br><a href="https://ambientcg.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir ambientCG</a></aside><div class="builder-stage"><canvas id="builder-canvas"></canvas></div></div></div>
+<div id="overlay" class="overlay">
   <div class="menu-buttons" id="main-menu">
     <button id="btn-play" class="menu-hitbox" type="button" aria-label="Jogar" title="Jogar"></button>
     <button id="btn-settings" class="menu-hitbox" type="button" aria-label="Configurações" title="Configurações"></button>
@@ -113,12 +114,14 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 
 <!-- Arquivos .fbx embutidos (gerado por tools/embutir-assets.py): faz o jogo funcionar com duplo clique -->
 <script src="./assets-embutidos.js"></script>
-<script src="./server-config.js"></script>\n<script type="module">
+<script src="./server-config.js"></script>
+<script type="module">
 import * as THREE from 'three';
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FBXLoader.js';
 import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/geometries/TextGeometry.js';
-import { clone as cloneSkeleton } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/utils/SkeletonUtils.js';\nimport { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+import { clone as cloneSkeleton } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/utils/SkeletonUtils.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
 
 /* ============ CONFIG ============ */
 const CONFIG = {
@@ -1112,6 +1115,34 @@ if(DEVICE_MODE==='mobile'){
  const phoneObserver=new MutationObserver(syncControls);phoneObserver.observe(phone,{attributes:true,attributeFilter:['class']});syncControls();
 }
 window.minecity = { game }; // facilita testes no console (F12)
+
+// BUILDER MVP + MENU REPAIR
+const builderEl=document.getElementById('builder'), launchBuilder=document.getElementById('builder-launch');
+launchBuilder.addEventListener('click',()=>{builderEl.classList.remove('hidden');document.getElementById('overlay').classList.add('hidden');});
+document.getElementById('builder-exit').addEventListener('click',()=>{builderEl.classList.add('hidden');document.getElementById('overlay').classList.remove('hidden');});
+let bScene,bCamera,bRenderer,bGround,bObjects=[],bMode='place',bSelected=null;
+function initBuilder(){
+ if(bRenderer)return;
+ const canvas=document.getElementById('builder-canvas'),stage=canvas.parentElement;
+ bScene=new THREE.Scene();bScene.background=new THREE.Color(0x9bb7c8);
+ bCamera=new THREE.PerspectiveCamera(60,1,.1,1000);bCamera.position.set(18,22,26);bCamera.lookAt(0,0,0);
+ bRenderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});bRenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ bScene.add(new THREE.HemisphereLight(0xffffff,0x556644,2));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(15,30,10);bScene.add(sun);
+ bGround=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x477947}));bGround.rotation.x=-Math.PI/2;bScene.add(bGround);
+ const grid=new THREE.GridHelper(200,100,0x333333,0x777777);grid.position.y=.02;bScene.add(grid);
+ const resize=()=>{let w=stage.clientWidth,h=stage.clientHeight;bCamera.aspect=w/Math.max(1,h);bCamera.updateProjectionMatrix();bRenderer.setSize(w,h,false);};resize();window.addEventListener('resize',resize);
+ const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+ canvas.addEventListener('click',e=>{let rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-((e.clientY-rect.top)/rect.height)*2+1);ray.setFromCamera(mouse,bCamera);let hit=ray.intersectObject(bGround);if(hit.length&&bSelected&&bMode==='place'){const obj=bSelected.clone();obj.position.copy(hit[0].point);bScene.add(obj);bObjects.push(obj);}});
+ function animate(){requestAnimationFrame(animate);bRenderer.render(bScene,bCamera);}animate();
+}
+launchBuilder.addEventListener('click',initBuilder);
+document.getElementById('builder-grass').addEventListener('click',()=>{initBuilder();bGround.material.color.set(0x477947);});
+document.getElementById('builder-road').addEventListener('click',()=>{initBuilder();const road=new THREE.Mesh(new THREE.PlaneGeometry(12,200),new THREE.MeshStandardMaterial({color:0x30343a}));road.rotation.x=-Math.PI/2;road.position.y=.03;bScene.add(road);bObjects.push(road);});
+document.getElementById('builder-delete').addEventListener('click',()=>{bMode='delete';alert('Modo apagar: versão inicial. Use Limpar objetos para remover todos.');});
+document.getElementById('builder-clear').addEventListener('click',()=>{for(const o of bObjects)bScene.remove(o);bObjects=[];});
+document.getElementById('builder-files').addEventListener('change',async e=>{initBuilder();for(const file of e.target.files){try{const loader=new GLTFLoader();const url=URL.createObjectURL(file);loader.load(url,g=>{bSelected=g.scene;g.scene.name=file.name;URL.revokeObjectURL(url);const btn=document.createElement('button');btn.textContent='📦 '+file.name;btn.onclick=()=>{bSelected=g.scene;bMode='place';};document.getElementById('builder-assets').appendChild(btn);},undefined,err=>{console.error(err);alert('Não consegui carregar '+file.name);});}catch(err){console.error(err);}}});
+document.getElementById('builder-save').addEventListener('click',()=>{alert('O editor está funcional para posicionamento básico. Exportação completa do mapa será implementada na próxima etapa.');});
+
 </script>
 </body>
 </html>
