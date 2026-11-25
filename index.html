@@ -48,13 +48,21 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 #phone{position:fixed;z-index:40;right:24px;top:50%;transform:translateY(-50%);width:min(330px,90vw);height:min(590px,85vh);background:#090b12;border:4px solid #292d38;border-radius:32px;box-shadow:0 0 0 2px #555,0 20px 60px #0009;color:#fff;padding:12px;display:flex;flex-direction:column;font-family:system-ui}
 #phone.hidden{display:none!important}.phone-notch{width:85px;height:14px;border-radius:20px;background:#222;margin:0 auto 8px}.phone-header{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;font-weight:800}.phone-screen{flex:1;border-radius:20px;background:linear-gradient(150deg,#34105b,#111827 65%);padding:14px;overflow:auto}.phone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.phone-app{border:0;border-radius:16px;background:#ffffff18;color:white;padding:12px 5px;min-height:82px;font-size:12px;cursor:pointer}.phone-app span{display:block;font-size:26px;margin-bottom:5px}.phone-bottom{padding:8px;display:flex;justify-content:center}.phone-bottom button,.phone-header button{border:0;border-radius:20px;background:#ffffff20;color:white;padding:8px 13px;cursor:pointer}.phone-content h3{margin:5px 0 12px}.phone-content p{color:#ddd;line-height:1.45}.phone-content button{display:block;width:100%;margin:8px 0;padding:12px;border:0;border-radius:12px;background:#a42df0;color:white;font-weight:bold}
 @media(max-width:700px){#phone-open{right:12px;bottom:12px;padding:10px 13px}#phone{right:8px;top:50%;transform:translateY(-50%);width:min(330px,90vw);height:min(590px,85vh)}}
+
+/* CONTROLES TOUCH: apenas no modo mobile */
+#mobile-controls{position:fixed;inset:0;z-index:15;pointer-events:none;user-select:none;-webkit-user-select:none;touch-action:none}
+#mobile-controls.hidden{display:none!important}.joy-base{position:absolute;left:22px;bottom:28px;width:142px;height:142px;border-radius:50%;background:rgba(20,20,30,.38);border:2px solid rgba(255,255,255,.45);pointer-events:auto;touch-action:none}
+#joy-knob{position:absolute;left:50%;top:50%;width:62px;height:62px;border-radius:50%;transform:translate(-50%,-50%);background:rgba(170,65,255,.82);border:2px solid #fff;box-shadow:0 0 16px #9b42d6}
+.mobile-action{position:absolute;right:24px;border:2px solid rgba(255,255,255,.65);border-radius:50%;color:#fff;font-weight:900;background:rgba(90,30,150,.68);width:72px;height:72px;pointer-events:auto;touch-action:none;box-shadow:0 4px 14px #0006}
+#mobile-jump{bottom:32px;width:82px;height:82px;font-size:16px}#mobile-run{bottom:125px;right:28px}#mobile-camera-zone{position:absolute;right:0;top:15%;width:58%;height:65%;pointer-events:auto;touch-action:none}
+@media(max-width:700px){.hud-help{display:none}.hud-title{top:8px;left:8px;font-size:11px}.hud-fps{top:8px;right:8px;font-size:11px}}
 </style>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
 </script>
 </head>
 <body>
-<div id="app"></div><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
+<div id="app"></div><div id="mobile-controls" class="hidden"><div id="mobile-camera-zone"></div><div id="joy-base" class="joy-base"><div id="joy-knob"></div></div><button id="mobile-run" class="mobile-action" type="button">CORRER</button><button id="mobile-jump" class="mobile-action" type="button">PULAR</button></div><button id="phone-open" class="hidden" type="button">📱 CELULAR</button><div id="phone" class="hidden"><div class="phone-notch"></div><div class="phone-header"><span>📱 MINE PHONE</span><button id="phone-close">✕</button></div><div class="phone-screen"><div id="phone-main" class="phone-grid"><button class="phone-app" data-app="messages"><span>💬</span>Mensagens</button><button class="phone-app" data-app="contacts"><span>👥</span>Contatos</button><button class="phone-app" data-app="bank"><span>💳</span>Banco</button><button class="phone-app" data-app="map"><span>🗺️</span>Mapa</button><button class="phone-app" data-app="settings"><span>⚙️</span>Config.</button><button class="phone-app" data-app="camera"><span>📷</span>Câmera</button></div><div id="phone-content" class="phone-content hidden"></div></div><div class="phone-bottom"><button id="phone-home">⌂ Início</button></div></div>
 
 <div id="city-intro" class="city-intro hidden"><div class="intro-kicker">VOCÊ ESTÁ CHEGANDO EM</div><div class="intro-city">MINE CITY</div><div class="intro-sub">RIO DE JANEIRO · BRASIL</div></div>
 
@@ -173,6 +181,7 @@ class Input {
     this.jumpQueued = false;
     this.mouseDX = 0; this.mouseDY = 0;
     this.dragging = false;
+    this.touchAxis={x:0,y:0}; this.touchSprint=false;
     const prevent = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
     window.addEventListener('keydown', (e) => {
@@ -193,15 +202,13 @@ class Input {
     });
   }
   setEnabled(v) { this.enabled = v; this.reset(); }
-  reset() { this.keys.clear(); this.jumpQueued = false; this.mouseDX = 0; this.mouseDY = 0; this.dragging = false; }
+  reset() { this.keys.clear(); this.jumpQueued = false; this.mouseDX = 0; this.mouseDY = 0; this.dragging = false; if(!this.touchActive){this.touchAxis={x:0,y:0};this.touchSprint=false;} }
   isDown(...codes) { return codes.some((c) => this.keys.has(c)); }
   getMoveAxis() {
-    return {
-      x: (this.isDown('KeyD', 'ArrowRight') ? 1 : 0) - (this.isDown('KeyA', 'ArrowLeft') ? 1 : 0),
-      y: (this.isDown('KeyW', 'ArrowUp') ? 1 : 0) - (this.isDown('KeyS', 'ArrowDown') ? 1 : 0),
-    };
+    const keyboard={x:(this.isDown('KeyD','ArrowRight')?1:0)-(this.isDown('KeyA','ArrowLeft')?1:0),y:(this.isDown('KeyW','ArrowUp')?1:0)-(this.isDown('KeyS','ArrowDown')?1:0)};
+    return {x:keyboard.x||this.touchAxis.x,y:keyboard.y||this.touchAxis.y};
   }
-  isSprinting() { return this.isDown('ShiftLeft', 'ShiftRight'); }
+  isSprinting() { return this.touchSprint || this.isDown('ShiftLeft', 'ShiftRight'); }
   consumeJump() { const j = this.jumpQueued; this.jumpQueued = false; return j; }
   consumeMouse() { const d = { x: this.mouseDX, y: this.mouseDY }; this.mouseDX = 0; this.mouseDY = 0; return d; }
 }
@@ -1072,6 +1079,25 @@ function openPhone(){if(game.state!=='playing')return;phone.classList.remove('hi
 function closePhone(){phone.classList.add('hidden');phoneOpen.classList.remove('hidden');if(game.state==='playing'){game.input.setEnabled(true);game.tryLock();}}
 phoneOpen.addEventListener('click',openPhone);document.getElementById('phone-close').addEventListener('click',closePhone);document.getElementById('phone-home').addEventListener('click',()=>{phoneContent.classList.add('hidden');phoneMain.classList.remove('hidden');});phoneMain.querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>showPhoneApp(b.dataset.app)));window.addEventListener('keydown',e=>{if((e.code==='KeyE'||e.code==='KeyP')&&game.state==='playing'&&phone.classList.contains('hidden')){e.preventDefault();openPhone();}else if((e.code==='KeyE'||e.code==='KeyP')&&!phone.classList.contains('hidden')){e.preventDefault();closePhone();}});
 
+// Controles touch mobile: joystick, correr, pular e arrastar para girar câmera.
+if(DEVICE_MODE==='mobile'){
+ const controls=document.getElementById('mobile-controls'), base=document.getElementById('joy-base'),knob=document.getElementById('joy-knob'),run=document.getElementById('mobile-run'),jump=document.getElementById('mobile-jump'),cameraZone=document.getElementById('mobile-camera-zone');
+ controls.classList.remove('hidden');
+ let joyId=null,camId=null,camLast={x:0,y:0},joyCenter={x:0,y:0};
+ const updateJoy=e=>{const dx=e.clientX-joyCenter.x,dy=e.clientY-joyCenter.y,r=48,len=Math.hypot(dx,dy),scale=len>r?r/len:1;game.input.touchAxis={x:Math.max(-1,Math.min(1,dx*scale/r)),y:Math.max(-1,Math.min(1,-dy*scale/r))};knob.style.left=(50+game.input.touchAxis.x*38)+'%';knob.style.top=(50-game.input.touchAxis.y*38)+'%';};
+ base.addEventListener('pointerdown',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;e.preventDefault();joyId=e.pointerId;game.input.touchActive=true;joyCenter={x:base.getBoundingClientRect().left+base.clientWidth/2,y:base.getBoundingClientRect().top+base.clientHeight/2};base.setPointerCapture(e.pointerId);updateJoy(e);});
+ base.addEventListener('pointermove',e=>{if(e.pointerId===joyId)updateJoy(e);});
+ const endJoy=e=>{if(e.pointerId!==joyId)return;joyId=null;game.input.touchAxis={x:0,y:0};game.input.touchActive=false;knob.style.left='50%';knob.style.top='50%';};
+ base.addEventListener('pointerup',endJoy);base.addEventListener('pointercancel',endJoy);
+ run.addEventListener('pointerdown',e=>{e.preventDefault();game.input.touchSprint=true;run.setPointerCapture(e.pointerId);});const stopRun=()=>game.input.touchSprint=false;run.addEventListener('pointerup',stopRun);run.addEventListener('pointercancel',stopRun);run.addEventListener('lostpointercapture',stopRun);
+ jump.addEventListener('pointerdown',e=>{e.preventDefault();if(game.state==='playing'&&phone.classList.contains('hidden'))game.input.jumpQueued=true;jump.setPointerCapture(e.pointerId);});
+ cameraZone.addEventListener('pointerdown',e=>{if(game.state!=='playing'||!phone.classList.contains('hidden'))return;camId=e.pointerId;camLast={x:e.clientX,y:e.clientY};cameraZone.setPointerCapture(e.pointerId);});
+ cameraZone.addEventListener('pointermove',e=>{if(e.pointerId!==camId)return;game.input.mouseDX+=(e.clientX-camLast.x)*1.35;game.input.mouseDY+=(e.clientY-camLast.y)*1.35;camLast={x:e.clientX,y:e.clientY};});
+ const endCam=e=>{if(e.pointerId===camId)camId=null;};cameraZone.addEventListener('pointerup',endCam);cameraZone.addEventListener('pointercancel',endCam);
+ const syncControls=()=>controls.classList.toggle('hidden',game.state!=='playing'||!phone.classList.contains('hidden')); 
+ const oldSetState=game.setState.bind(game);game.setState=function(s){oldSetState(s);syncControls();}; 
+ const phoneObserver=new MutationObserver(syncControls);phoneObserver.observe(phone,{attributes:true,attributeFilter:['class']});syncControls();
+}
 window.minecity = { game }; // facilita testes no console (F12)
 </script>
 </body>
