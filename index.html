@@ -22,8 +22,8 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 .city-intro.hidden{display:none!important}.intro-kicker{font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.48em;font-weight:700;color:#e5e3dc;text-shadow:0 2px 8px #000;animation:introRise .8s both}.intro-city{margin:.12em 0;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(3.5rem,12vw,9rem);font-weight:900;letter-spacing:.08em;color:#d0d0c9;-webkit-text-stroke:2px #777a78;text-shadow:0 3px 0 #777,0 6px 0 #555,0 12px 22px rgba(0,0,0,.9);animation:introRise 1s .15s both}.intro-sub{font-size:clamp(.65rem,1.2vw,.95rem);letter-spacing:.35em;color:#fff;text-shadow:0 2px 8px #000;animation:introRise 1s .3s both}@keyframes introFade{0%,72%{opacity:1}100%{opacity:0}}@keyframes introRise{from{opacity:0;transform:translateY(24px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 
 .overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:0;background:#160027 url("./menu-bg.png") center center / 100% 100% no-repeat}
-.menu-buttons{position:absolute;inset:0}
-.menu-hitbox{position:absolute;left:37.2%;width:25.6%;height:7.1%;border:0;border-radius:12px;background:transparent;cursor:pointer;transition:background .18s,box-shadow .18s,transform .18s}
+.menu-buttons{position:absolute;inset:0;z-index:26;pointer-events:auto}
+.menu-hitbox{position:absolute;z-index:27;pointer-events:auto;left:37.2%;width:25.6%;height:7.1%;border:0;border-radius:12px;background:transparent;cursor:pointer;transition:background .18s,box-shadow .18s,transform .18s}
 .menu-hitbox:hover,.menu-hitbox:focus-visible{background:rgba(170,35,255,.23);box-shadow:0 0 22px rgba(190,50,255,.8);outline:2px solid rgba(255,255,255,.65);outline-offset:2px}
 .menu-hitbox:active{transform:scale(.98)}
 #btn-play{top:64.6%}
@@ -939,12 +939,8 @@ class UI {
     document.title = CONFIG.projectName;
     $('hud-project-name').textContent = CONFIG.projectName;
 
-    this.settingsBtn.addEventListener('click', () => {
-      this.settingsPanel.classList.remove('hidden');
-    });
-    $('btn-back').addEventListener('click', () => {
-      this.settingsPanel.classList.add('hidden');
-    });
+    this.settingsBtn.onclick = () => { this.settingsPanel.classList.remove('hidden'); };
+    $('btn-back').onclick = () => { this.settingsPanel.classList.add('hidden'); };
     $('btn-resume').addEventListener('click', () => {
       if (this.resumeCallback) this.resumeCallback();
     });
@@ -952,7 +948,7 @@ class UI {
       if (this.menuCallback) this.menuCallback();
     });
   }
-  onPlay(cb) { this.playBtn.addEventListener('click', cb); }
+  onPlay(cb) { this.playBtn.onclick = cb; }
   onResume(cb) { this.resumeCallback = cb; }
   onMainMenu(cb) { this.menuCallback = cb; }
   showOverlay(mode) {
