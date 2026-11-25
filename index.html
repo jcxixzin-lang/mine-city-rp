@@ -86,7 +86,7 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 </div>
 
 <button id="builder-launch" type="button">🏗️ CONSTRUTOR DA CIDADE</button>
-<div id="builder" class="hidden"><div class="builder-head"><h2>🏗️ CONSTRUTOR — MINE CITY</h2><div><button id="builder-save">EXPORTAR MAPA</button> <button id="builder-exit">VOLTAR AO JOGO</button></div></div><div class="builder-body"><aside class="builder-sidebar"><h3>Biblioteca de assets</h3><p>Importe modelos 3D .GLB/.GLTF que você baixou. Depois clique no chão para posicionar.</p><p><b>Câmera:</b> arraste com botão direito (ou botão do meio), use a roda para zoom. Clique nos objetos para selecioná-los e use os controles abaixo.</p><h3>Editar selecionado</h3><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px"><button id="b-move-xn">← X</button><button id="b-move-xp">X →</button><button id="b-move-zn">↑ Z</button><button id="b-move-zp">Z ↓</button><button id="b-move-yn">Y −</button><button id="b-move-yp">Y +</button><button id="b-scale-down">➖ Diminuir</button><button id="b-scale-up">➕ Aumentar</button><button id="b-rot-y">↻ Girar Y</button><button id="b-rot-x">Girar X</button><button id="b-rot-z">Girar Z</button></div><label>📦 IMPORTAR MODELOS (.glb/.gltf)<input id="builder-files" type="file" accept=".glb,.gltf" multiple></label><div id="builder-assets"></div><hr><h3>Terreno</h3><button id="builder-grass">🌱 Pintar terreno (verde)</button><button id="builder-road">🛣️ Colocar rua</button><button id="builder-delete">🗑️ Apagar objeto</button><button id="builder-clear">🧹 Limpar objetos</button><p class="builder-info">Poly Haven e ambientCG são fontes de assets. Baixe modelos/arquivos e importe aqui. GLB funciona melhor. Texturas ambientCG são materiais, normalmente precisam ser aplicadas ao terreno/material.</p><a href="https://polyhaven.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir Poly Haven</a><br><a href="https://ambientcg.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir ambientCG</a></aside><div class="builder-stage"><canvas id="builder-canvas"></canvas></div></div></div>
+<div id="builder" class="hidden"><div class="builder-head"><h2>🏗️ CONSTRUTOR — MINE CITY</h2><div><button id="builder-save">EXPORTAR MAPA</button> <button id="builder-exit">VOLTAR AO JOGO</button></div></div><div class="builder-body"><aside class="builder-sidebar"><h3>Biblioteca de assets</h3><p>Importe modelos 3D .GLB/.GLTF que você baixou. Depois clique no chão para posicionar.</p><p><b>Gizmo:</b> selecione objeto e arraste as setas/círculos. Use o scroll com Shift para redimensionar. Botão direito arrasta para girar a câmera.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px"><button id="b-mode-move">↔ Mover</button><button id="b-mode-rotate">⟳ Girar</button><button id="b-mode-scale">⤢ Escala</button></div><label>📦 IMPORTAR MODELOS (.glb/.gltf)<input id="builder-files" type="file" accept=".glb,.gltf" multiple></label><div id="builder-assets"></div><hr><h3>Terreno</h3><button id="builder-grass">🌱 Pintar terreno (verde)</button><button id="builder-road">🛣️ Colocar rua</button><button id="builder-delete">🗑️ Apagar objeto</button><button id="builder-clear">🧹 Limpar objetos</button><p class="builder-info">Poly Haven e ambientCG são fontes de assets. Baixe modelos/arquivos e importe aqui. GLB funciona melhor. Texturas ambientCG são materiais, normalmente precisam ser aplicadas ao terreno/material.</p><a href="https://polyhaven.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir Poly Haven</a><br><a href="https://ambientcg.com/" target="_blank" rel="noopener" style="color:#df9aff">Abrir ambientCG</a></aside><div class="builder-stage"><canvas id="builder-canvas"></canvas></div></div></div>
 <div id="overlay" class="overlay">
   <div class="menu-buttons" id="main-menu">
     <button id="btn-play" class="menu-hitbox" type="button" aria-label="Jogar" title="Jogar"></button>
@@ -122,6 +122,7 @@ import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/
 import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/geometries/TextGeometry.js';
 import { clone as cloneSkeleton } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+import { TransformControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/TransformControls.js';
 
 /* ============ CONFIG ============ */
 const CONFIG = {
@@ -1120,39 +1121,34 @@ window.minecity = { game }; // facilita testes no console (F12)
 const builderEl=document.getElementById('builder'), launchBuilder=document.getElementById('builder-launch');
 launchBuilder.addEventListener('click',()=>{builderEl.classList.remove('hidden');document.getElementById('overlay').classList.add('hidden');});
 document.getElementById('builder-exit').addEventListener('click',()=>{builderEl.classList.add('hidden');document.getElementById('overlay').classList.remove('hidden');});
-let bScene,bCamera,bRenderer,bGround,bObjects=[],bMode='place',bSelected=null,bSource=null,bTarget=new THREE.Vector3(),bYaw=0,bPitch=.65,bDist=38,bOrbit=false,bLast={x:0,y:0};
+let bScene,bCamera,bRenderer,bGround,bObjects=[],bMode='place',bSelected=null,bSource=null,bTarget=new THREE.Vector3(),bYaw=0,bPitch=.65,bDist=38,bOrbit=false,bLast={x:0,y:0},bTransform;
 function initBuilder(){
  if(bRenderer)return;
  const canvas=document.getElementById('builder-canvas'),stage=canvas.parentElement;
- bScene=new THREE.Scene();bScene.background=new THREE.Color(0x9bb7c8);
- bCamera=new THREE.PerspectiveCamera(60,1,.1,1000);
+ bScene=new THREE.Scene();bScene.background=new THREE.Color(0x9bb7c8);bCamera=new THREE.PerspectiveCamera(60,1,.1,1000);
  bRenderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});bRenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
  bScene.add(new THREE.HemisphereLight(0xffffff,0x556644,2));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(15,30,10);bScene.add(sun);
- bGround=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x477947}));bGround.rotation.x=-Math.PI/2;bScene.add(bGround);
- const grid=new THREE.GridHelper(200,100,0x333333,0x777777);grid.position.y=.02;bScene.add(grid);
+ bGround=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x477947}));bGround.rotation.x=-Math.PI/2;bScene.add(bGround);bScene.add(new THREE.GridHelper(200,100,0x333333,0x777777));
+ bTransform=new TransformControls(bCamera,bRenderer.domElement);bTransform.setSize(1);bTransform.addEventListener('dragging-changed',e=>{bOrbit=!e.value;});bScene.add(bTransform.getHelper());
  const resize=()=>{let w=stage.clientWidth,h=stage.clientHeight;bCamera.aspect=w/Math.max(1,h);bCamera.updateProjectionMatrix();bRenderer.setSize(w,h,false);};resize();window.addEventListener('resize',resize);
  const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
  function cast(e){let rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-((e.clientY-rect.top)/rect.height)*2+1);ray.setFromCamera(mouse,bCamera);}
  canvas.addEventListener('pointerdown',e=>{if(e.button===2||e.button===1){bOrbit=true;bLast={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});
- canvas.addEventListener('pointermove',e=>{if(bOrbit){bYaw-=(e.clientX-bLast.x)*.008;bPitch=Math.max(.12,Math.min(1.48,bPitch+(e.clientY-bLast.y)*.008));bLast={x:e.clientX,y:e.clientY};} });
- canvas.addEventListener('pointerup',()=>bOrbit=false);canvas.addEventListener('pointercancel',()=>bOrbit=false);
- canvas.addEventListener('contextmenu',e=>e.preventDefault());
- canvas.addEventListener('wheel',e=>{e.preventDefault();bDist=Math.max(5,Math.min(120,bDist+e.deltaY*.04));},{passive:false});
- canvas.addEventListener('click',e=>{if(bOrbit)return;cast(e);let hits=ray.intersectObjects(bObjects,true);if(hits.length){let root=hits[0].object;while(root.parent&&root.parent!==bScene)root=root.parent;bSelected=root;return;}let hit=ray.intersectObject(bGround);if(hit.length&&bSource&&bMode==='place'){const obj=cloneSkeleton(bSource);obj.position.copy(hit[0].point);bScene.add(obj);bObjects.push(obj);bSelected=obj;}});
+ canvas.addEventListener('pointermove',e=>{if(bOrbit){bYaw-=(e.clientX-bLast.x)*.008;bPitch=Math.max(.12,Math.min(1.48,bPitch+(e.clientY-bLast.y)*.008));bLast={x:e.clientX,y:e.clientY};}});
+ canvas.addEventListener('pointerup',()=>bOrbit=false);canvas.addEventListener('pointercancel',()=>bOrbit=false);canvas.addEventListener('contextmenu',e=>e.preventDefault());
+ canvas.addEventListener('wheel',e=>{e.preventDefault();if(e.shiftKey&&bSelected){let f=e.deltaY>0?.92:1.08;bSelected.scale.multiplyScalar(f);}else bDist=Math.max(5,Math.min(120,bDist+e.deltaY*.04));},{passive:false});
+ canvas.addEventListener('click',e=>{if(bOrbit||bTransform.dragging)return;cast(e);let hits=ray.intersectObjects(bObjects,true);if(hits.length){let root=hits[0].object;while(root.parent&&root.parent!==bScene)root=root.parent;bSelected=root;bTransform.attach(root);return;}let hit=ray.intersectObject(bGround);if(hit.length&&bSource&&bMode==='place'){const obj=cloneSkeleton(bSource);obj.position.copy(hit[0].point);bScene.add(obj);bObjects.push(obj);bSelected=obj;bTransform.attach(obj);}});
  function animate(){requestAnimationFrame(animate);bCamera.position.set(bTarget.x+bDist*Math.sin(bYaw)*Math.cos(bPitch),bTarget.y+bDist*Math.sin(bPitch),bTarget.z+bDist*Math.cos(bYaw)*Math.cos(bPitch));bCamera.lookAt(bTarget);bRenderer.render(bScene,bCamera);}animate();
 }
 launchBuilder.addEventListener('click',initBuilder);
+document.getElementById('b-mode-move').onclick=()=>{initBuilder();bTransform.setMode('translate');};
+document.getElementById('b-mode-rotate').onclick=()=>{initBuilder();bTransform.setMode('rotate');};
+document.getElementById('b-mode-scale').onclick=()=>{initBuilder();bTransform.setMode('scale');};
 document.getElementById('builder-grass').addEventListener('click',()=>{initBuilder();bGround.material.color.set(0x477947);});
-document.getElementById('builder-road').addEventListener('click',()=>{initBuilder();const road=new THREE.Mesh(new THREE.PlaneGeometry(12,200),new THREE.MeshStandardMaterial({color:0x30343a}));road.rotation.x=-Math.PI/2;road.position.y=.03;bScene.add(road);bObjects.push(road);bSelected=road;});
-document.getElementById('builder-delete').addEventListener('click',()=>{if(bSelected){bScene.remove(bSelected);bObjects=bObjects.filter(o=>o!==bSelected);bSelected=null;}else bMode='delete';});
-document.getElementById('builder-clear').addEventListener('click',()=>{for(const o of bObjects)bScene.remove(o);bObjects=[];bSelected=null;});
+document.getElementById('builder-road').addEventListener('click',()=>{initBuilder();const road=new THREE.Mesh(new THREE.PlaneGeometry(12,200),new THREE.MeshStandardMaterial({color:0x30343a}));road.rotation.x=-Math.PI/2;road.position.y=.03;bScene.add(road);bObjects.push(road);bSelected=road;bTransform.attach(road);});
+document.getElementById('builder-delete').addEventListener('click',()=>{if(bSelected){bTransform.detach();bScene.remove(bSelected);bObjects=bObjects.filter(o=>o!==bSelected);bSelected=null;}});
+document.getElementById('builder-clear').addEventListener('click',()=>{bTransform.detach();for(const o of bObjects)bScene.remove(o);bObjects=[];bSelected=null;});
 document.getElementById('builder-files').addEventListener('change',e=>{initBuilder();for(const file of e.target.files){const loader=new GLTFLoader(),url=URL.createObjectURL(file);loader.load(url,g=>{bSource=g.scene;g.scene.name=file.name;URL.revokeObjectURL(url);const btn=document.createElement('button');btn.textContent='📦 '+file.name;btn.onclick=()=>{bSource=g.scene;bMode='place';};document.getElementById('builder-assets').appendChild(btn);},undefined,err=>{console.error(err);alert('Não consegui carregar '+file.name);});}});
-const moveObj=(axis,amount)=>{if(bSelected)bSelected.position[axis]+=amount;};
-const scaleObj=f=>{if(bSelected)bSelected.scale.multiplyScalar(f);};
-const rotateObj=(axis,angle)=>{if(bSelected)bSelected.rotation[axis]+=angle;};
-document.getElementById('b-move-xp').onclick=()=>moveObj('x',1);document.getElementById('b-move-xn').onclick=()=>moveObj('x',-1);document.getElementById('b-move-zp').onclick=()=>moveObj('z',1);document.getElementById('b-move-zn').onclick=()=>moveObj('z',-1);document.getElementById('b-move-yp').onclick=()=>moveObj('y',1);document.getElementById('b-move-yn').onclick=()=>moveObj('y',-1);
-document.getElementById('b-scale-down').onclick=()=>scaleObj(.8);document.getElementById('b-scale-up').onclick=()=>scaleObj(1.25);
-document.getElementById('b-rot-y').onclick=()=>rotateObj('y',Math.PI/4);document.getElementById('b-rot-x').onclick=()=>rotateObj('x',Math.PI/4);document.getElementById('b-rot-z').onclick=()=>rotateObj('z',Math.PI/4);
 document.getElementById('builder-save').addEventListener('click',()=>{alert('Exportação completa do mapa será implementada na próxima etapa.');});
 </script>
 </body>
