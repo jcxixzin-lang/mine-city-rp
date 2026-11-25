@@ -1155,5 +1155,12 @@ document.getElementById('builder-blend').addEventListener('change',e=>{const fil
 document.getElementById('builder-files').addEventListener('change',e=>{initBuilder();for(const file of e.target.files){const loader=new GLTFLoader(),url=URL.createObjectURL(file);loader.load(url,g=>{bSource=g.scene;g.scene.name=file.name;URL.revokeObjectURL(url);const btn=document.createElement('button');btn.textContent='📦 '+file.name;btn.onclick=()=>{bSource=g.scene;bMode='place';};document.getElementById('builder-assets').appendChild(btn);},undefined,err=>{console.error(err);alert('Não consegui carregar '+file.name);});}});
 document.getElementById('builder-save').addEventListener('click',()=>{alert('Exportação completa do mapa será implementada na próxima etapa.');});
 </script>
+
+<script>
+// Diagnóstico de inicialização para revelar erros que bloqueiam o menu.
+window.addEventListener('error',function(e){var m=e.message||'Erro JavaScript';var el=document.getElementById('startup-diagnostic');if(!el){el=document.createElement('div');el.id='startup-diagnostic';el.style.cssText='position:fixed;z-index:99999;top:10px;left:10px;right:10px;padding:14px;background:#7b1616;color:white;font:16px sans-serif;border-radius:10px';document.body.appendChild(el);}el.textContent='ERRO AO INICIAR: '+m;});
+window.addEventListener('unhandledrejection',function(e){var el=document.getElementById('startup-diagnostic');if(!el){el=document.createElement('div');el.id='startup-diagnostic';el.style.cssText='position:fixed;z-index:99999;top:10px;left:10px;right:10px;padding:14px;background:#7b1616;color:white;font:16px sans-serif;border-radius:10px';document.body.appendChild(el);}el.textContent='ERRO DE CARREGAMENTO: '+(e.reason&&e.reason.message||e.reason||'desconhecido');});
+setTimeout(function(){if(!window.minecity){var el=document.getElementById('startup-diagnostic');if(!el){el=document.createElement('div');el.id='startup-diagnostic';el.style.cssText='position:fixed;z-index:99999;top:10px;left:10px;right:10px;padding:14px;background:#7b1616;color:white;font:16px sans-serif;border-radius:10px';document.body.appendChild(el);}el.textContent='O jogo não terminou de iniciar. Recarregue e envie esta mensagem ao desenvolvedor.';}},12000);
+</script>
 </body>
 </html>
