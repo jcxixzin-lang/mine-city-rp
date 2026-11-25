@@ -63,7 +63,7 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
   <div class="hud-fps"><span id="hud-fps">--</span> FPS <span id="online-status" class="online-status">OFFLINE</span></div>
   <div class="hud-help">
     <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</span>
-    <span><kbd>Espaço</kbd> pular</span>
+    <span><kbd>E</kbd> celular</span><span><kbd>Espaço</kbd> pular</span>
     <span><kbd>Shift</kbd> correr</span>
     <span><kbd>Mouse</kbd> câmera</span>
     <span><kbd>Esc</kbd> pausar</span>
@@ -1054,7 +1054,7 @@ const phone=document.getElementById('phone'),phoneOpen=document.getElementById('
 function showPhoneApp(app){phoneMain.classList.add('hidden');phoneContent.classList.remove('hidden');const pages={messages:'<h3>💬 Mensagens</h3><p>Chat entre jogadores será integrado numa próxima etapa.</p>',contacts:'<h3>👥 Contatos</h3><p>Lista de jogadores e contatos em breve.</p>',bank:'<h3>💳 Mine Bank</h3><p>Saldo: <b>R$ 0</b></p><p>Pagamentos e transferências em breve.</p>',map:'<h3>🗺️ Mapa</h3><p>Mapa de Mine City será integrado aqui.</p>',settings:'<h3>⚙️ Configurações</h3><p>Mine Phone • versão inicial</p>',camera:'<h3>📷 Câmera</h3><p>Câmera do jogo será adicionada depois.</p>'};phoneContent.innerHTML=pages[app]||pages.settings;}
 function openPhone(){if(game.state!=='playing')return;phone.classList.remove('hidden');phoneOpen.classList.add('hidden');game.input.setEnabled(false);if(document.pointerLockElement)document.exitPointerLock();}
 function closePhone(){phone.classList.add('hidden');phoneOpen.classList.remove('hidden');if(game.state==='playing'){game.input.setEnabled(true);game.tryLock();}}
-phoneOpen.addEventListener('click',openPhone);document.getElementById('phone-close').addEventListener('click',closePhone);document.getElementById('phone-home').addEventListener('click',()=>{phoneContent.classList.add('hidden');phoneMain.classList.remove('hidden');});phoneMain.querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>showPhoneApp(b.dataset.app)));window.addEventListener('keydown',e=>{if(e.code==='KeyP'&&game.state==='playing'&&phone.classList.contains('hidden'))openPhone();else if(e.code==='KeyP'&&!phone.classList.contains('hidden'))closePhone();});
+phoneOpen.addEventListener('click',openPhone);document.getElementById('phone-close').addEventListener('click',closePhone);document.getElementById('phone-home').addEventListener('click',()=>{phoneContent.classList.add('hidden');phoneMain.classList.remove('hidden');});phoneMain.querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>showPhoneApp(b.dataset.app)));window.addEventListener('keydown',e=>{if((e.code==='KeyE'||e.code==='KeyP')&&game.state==='playing'&&phone.classList.contains('hidden')){e.preventDefault();openPhone();}else if((e.code==='KeyE'||e.code==='KeyP')&&!phone.classList.contains('hidden')){e.preventDefault();closePhone();}});
 
 window.minecity = { game }; // facilita testes no console (F12)
 </script>
