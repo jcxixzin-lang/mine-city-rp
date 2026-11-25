@@ -22,12 +22,11 @@ kbd{display:inline-block;min-width:1.8em;padding:.15em .5em;margin-right:.25rem;
 .city-intro.hidden{display:none!important}.intro-kicker{font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.48em;font-weight:700;color:#e5e3dc;text-shadow:0 2px 8px #000;animation:introRise .8s both}.intro-city{margin:.12em 0;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(3.5rem,12vw,9rem);font-weight:900;letter-spacing:.08em;color:#d0d0c9;-webkit-text-stroke:2px #777a78;text-shadow:0 3px 0 #777,0 6px 0 #555,0 12px 22px rgba(0,0,0,.9);animation:introRise 1s .15s both}.intro-sub{font-size:clamp(.65rem,1.2vw,.95rem);letter-spacing:.35em;color:#fff;text-shadow:0 2px 8px #000;animation:introRise 1s .3s both}@keyframes introFade{0%,72%{opacity:1}100%{opacity:0}}@keyframes introRise{from{opacity:0;transform:translateY(24px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 
 .overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:0;background:#160027 url("./menu-bg.png") center center / 100% 100% no-repeat}
-.menu-buttons{position:absolute;inset:0;z-index:26;pointer-events:auto}
-.menu-hitbox{position:absolute;z-index:27;pointer-events:auto;left:37.2%;width:25.6%;height:7.1%;border:0;border-radius:12px;background:transparent;cursor:pointer;transition:background .18s,box-shadow .18s,transform .18s}
-.menu-hitbox:hover,.menu-hitbox:focus-visible{background:rgba(170,35,255,.23);box-shadow:0 0 22px rgba(190,50,255,.8);outline:2px solid rgba(255,255,255,.65);outline-offset:2px}
-.menu-hitbox:active{transform:scale(.98)}
-#btn-play{top:64.6%}
-#btn-settings{top:72.5%}
+.menu-buttons{position:absolute;inset:0;z-index:26;pointer-events:none}
+.menu-hitbox{position:absolute;left:50%;transform:translateX(-50%);width:min(360px,80vw);height:64px;border:2px solid #c36aff;border-radius:16px;background:linear-gradient(135deg,#8200d9,#41006f);color:#fff;font-size:20px;font-weight:900;letter-spacing:.1em;cursor:pointer;pointer-events:auto;box-shadow:0 5px 25px #0008}
+.menu-hitbox:hover{filter:brightness(1.2)}
+#btn-play{top:60%}#btn-play::after{content:'JOGAR'}
+#btn-settings{top:70%}#btn-settings::after{content:'CONFIGURAÇÕES'}
 .settings-panel{position:absolute;inset:0;display:grid;place-items:center;padding:1rem;background:rgba(8,0,20,.82);backdrop-filter:blur(8px);z-index:30}
 .settings-box{width:min(390px,92vw);padding:30px;text-align:center;background:rgba(23,8,42,.97);border:2px solid #a52bff;border-radius:16px;box-shadow:0 0 35px rgba(153,0,255,.35)}
 .settings-box h2{margin:0 0 12px;color:#d69aff;letter-spacing:.08em}
@@ -939,7 +938,7 @@ class UI {
     document.title = CONFIG.projectName;
     $('hud-project-name').textContent = CONFIG.projectName;
 
-    this.settingsBtn.onclick = () => { this.settingsPanel.classList.remove('hidden'); };
+    this.settingsBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.settingsPanel.classList.remove('hidden'); });
     $('btn-back').onclick = () => { this.settingsPanel.classList.add('hidden'); };
     $('btn-resume').addEventListener('click', () => {
       if (this.resumeCallback) this.resumeCallback();
@@ -948,7 +947,7 @@ class UI {
       if (this.menuCallback) this.menuCallback();
     });
   }
-  onPlay(cb) { this.playBtn.onclick = cb; }
+  onPlay(cb) { this.playBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); cb(); }); }
   onResume(cb) { this.resumeCallback = cb; }
   onMainMenu(cb) { this.menuCallback = cb; }
   showOverlay(mode) {
