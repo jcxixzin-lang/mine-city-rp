@@ -258,24 +258,26 @@ class World {
     g.rotation.x=-Math.PI/2; g.position.y=-0.035; this.scene.add(g);
   }
   buildRoadNetwork() {
-    const dashesH=[],dashesV=[],crossH=[],crossV=[];
-    for (const z of [-78,-38,38,78]) {
-      this.addBox(230,.12,14,this.shared.asphalt,0,.02,z);
-      this.addBox(230,.08,1.2,this.shared.yellow,0,.095,z);
-      for(let x=-108;x<=108;x+=12) dashesH.push([x,.095,z-4.5]);
+    // Rede urbana regular: eixos retos e espaçamento uniforme, sem ruas duplicadas.
+    const coords=[-180,-120,-60,60,120,180], dashH=[],dashV=[],crossH=[],crossV=[];
+    for(const z of coords) {
+      this.addBox(410,.12,14,this.shared.asphalt,0,.02,z);
+      this.addBox(410,.08,1.1,this.shared.yellow,0,.095,z);
+      for(let x=-198;x<=198;x+=14) dashH.push([x,.105,z-4.5]);
+      for(const side of [-1,1]) this.addBox(410,.28,2.6,this.shared.sidewalk,0,.14,z+side*8.6);
     }
-    for (const x of [-78,-38,38,78]) {
-      this.addBox(14,.12,230,this.shared.asphalt,x,.02,0);
-      this.addBox(1.2,.08,230,this.shared.yellow,x,.095,0);
-      for(let z=-108;z<=108;z+=12) dashesV.push([x-4.5,.095,z]);
+    for(const x of coords) {
+      this.addBox(14,.12,410,this.shared.asphalt,x,.02,0);
+      this.addBox(1.1,.08,410,this.shared.yellow,x,.095,0);
+      for(let z=-198;z<=198;z+=14) dashV.push([x-4.5,.105,z]);
+      for(const side of [-1,1]) this.addBox(2.6,.28,410,this.shared.sidewalk,x+side*8.6,.14,0);
     }
-    for (const z of [-78,-38,38,78]) for(const side of [-1,1]) this.addBox(230,.28,2.8,this.shared.sidewalk,0,.13,z+side*8.5);
-    for (const x of [-78,-38,38,78]) for(const side of [-1,1]) this.addBox(2.8,.28,230,this.shared.sidewalk,x+side*8.5,.13,0);
-    for(const x of [-78,-38,38,78]) for(const z of [-78,-38,38,78]) {
-      for(let i=-3;i<=3;i++) { crossH.push([x+i*1.7,.105,z-9.8]); crossV.push([x-9.8,.105,z+i*1.7,Math.PI/2]); }
+    this.addInstances(5,.025,.18,this.shared.white,dashH);
+    this.addInstances(.18,.025,5,this.shared.white,dashV);
+    // Faixas apenas nos cruzamentos desta malha.
+    for(const x of coords) for(const z of coords) {
+      for(let i=-3;i<=3;i++){crossH.push([x+i*1.7,.105,z-9.8]);crossV.push([x-9.8,.105,z+i*1.7,Math.PI/2]);}
     }
-    this.addInstances(5,.025,.18,this.shared.white,dashesH);
-    this.addInstances(.18,.025,5,this.shared.white,dashesV);
     this.addInstances(1.15,.035,7.5,this.shared.white,crossH);
     this.addInstances(1.15,.035,7.5,this.shared.white,crossV);
   }
@@ -330,113 +332,64 @@ class World {
     return body;
   }
   buildCityBlocks() {
-    // Quadras ao redor do centro: comércio perto da praça e residências nas bordas.
-    const blocks=[
-      [-58,-58,'res'],[58,-58,'res'],[-58,58,'res'],[58,58,'res'],
-      [-108,-58,'res'],[108,-58,'res'],[-108,58,'res'],[108,58,'res'],
-      [-58,-108,'res'],[58,-108,'res'],[-58,108,'res'],[58,108,'res']
-    ];
-    let seed=17; const rand=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
-    for(const [cx,cz] of blocks) {
-      for(let i=0;i<3;i++) {
-        const x=cx+(i-1)*13, z=cz+(rand()-.5)*12;
-        const h=10+rand()*19; this.building(x,z,10+rand()*3,10+rand()*3,h,Math.floor(rand()*5),'residencial');
+    // Quadras ocupadas, posicionadas sempre no meio dos eixos da malha.
+    let seed=20261125; const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+    const centers=[-150,-90,-30,30,90,150];
+    for(const cx of centers) for(const cz of centers) {
+      // Praça central ocupa o bloco central; preserva um corredor livre ao redor.
+      if(Math.abs(cx)<=30 && Math.abs(cz)<=30) continue;
+      const parkBlock=(Math.abs(cx)===150 && Math.abs(cz)===150);
+      if(parkBlock) {
+        this.addBox(44,.16,44,this.shared.grass,cx,.02,cz);
+        this.addBox(3,.08,40,this.shared.sidewalk,cx,.13,cz);
+        this.addBox(40,.08,3,this.shared.sidewalk,cx,.13,cz);
+        for(let i=0;i<12;i++) this.addTree(cx+(rand()-.5)*34,cz+(rand()-.5)*34,.75+rand()*.4);
+        continue;
       }
+      // Composição de 2-4 construções por quadra, deixando pequenas entradas e passeios.
+      const n=2+Math.floor(rand()*3);
+      for(let i=0;i<n;i++) {
+        const x=cx+(rand()-.5)*32,z=cz+(rand()-.5)*32;
+        const w=7+rand()*10,d=7+rand()*10,h=6+rand()*24;
+        const kind=rand();
+        const colors=[0xc9b99f,0x9caeb1,0xd5d0c4,0xb9a7a0,0xaaa994,0xc2d0c1,0x8f9ca8];
+        if(kind<.18) {
+          // Pequenos galpões com perfil baixo.
+          const body=this.addBox(w,h*.35,d,this.shared.concrete,x,.25+h*.175,z,true);
+          this.addCollider(x,z,w/2,d/2);
+          this.addBox(w+.35,.3,d+.35,this.shared.dark,x,.25+h*.35+.16,z);
+        } else this.building(x,z,w,d,h,Math.floor(rand()*5),kind<.52?'loja':'residencial');
+      }
+      // Árvores e bancos em pequenas áreas de esquina.
+      if(rand()>.45) this.addTree(cx+(rand()-.5)*38,cz+(rand()-.5)*38,.8);
     }
-    // Fachadas comerciais e edifícios marcantes em volta do centro.
-    this.building(-28,-57,17,13,12,2,'loja'); this.building(28,-57,17,13,17,1,'servico');
-    this.building(-57,-28,13,17,22,3,'servico'); this.building(57,-28,13,17,15,0,'loja');
-    this.building(-57,28,13,17,18,4,'loja'); this.building(57,28,13,17,24,1,'residencial');
-    this.building(-28,57,17,13,14,0,'loja'); this.building(28,57,17,13,20,2,'servico');
-    // Posto de gasolina reconhecível na avenida sul.
-    this.addBox(22,.35,15,this.shared.white,-28,.55,94,true);
-    for(const x of [-35,-28,-21]) { this.addBox(.45,3,.45,this.shared.white,x,2,94,true); this.addBox(2.8,.25,1.2,this.shared.yellow,x,3.6,94,true); }
-    this.addBox(25,.35,1.2,this.shared.dark,-28,4.2,94,true);
+    // Serviços reconhecíveis perto da praça, sem atravessar a malha de ruas.
+    this.building(-90,-30,13,12,11,2,'loja');
+    this.building(90,-30,13,12,16,1,'servico');
+    this.building(-30,90,12,13,14,3,'loja');
+    this.building(30,90,12,13,19,0,'servico');
   }
   buildStreetDetails() {
     const poles=[],arms=[],lamps=[];
-    for(const z of [-78,-38,38,78]) for(const x of [-100,-70,-25,25,70,100]) { poles.push([x,2.9,z]); arms.push([x+.65,5.55,z]); lamps.push([x+1.25,5.42,z]); }
-    for(const x of [-78,-38,38,78]) for(const z of [-100,-70,-25,25,70,100]) { poles.push([x,2.9,z]); arms.push([x+.65,5.55,z]); lamps.push([x+1.25,5.42,z]); }
+    const coords=[-180,-120,-60,60,120,180];
+    for(const z of coords) for(const x of [-190,-150,-90,-30,30,90,150,190]) {
+      poles.push([x,2.9,z]);arms.push([x+.65,5.55,z]);lamps.push([x+1.25,5.42,z]);
+    }
+    for(const x of coords) for(const z of [-190,-150,-90,-30,30,90,150,190]) {
+      poles.push([x,2.9,z]);arms.push([x+.65,5.55,z]);lamps.push([x+1.25,5.42,z]);
+    }
     this.addInstances(.22,5.5,.22,this.shared.dark,poles);
     this.addInstances(1.6,.12,.14,this.shared.dark,arms);
     const lampMat=new THREE.MeshStandardMaterial({color:0xffe8b0,emissive:0x4a3512,roughness:.4});
     this.addInstances(.8,.18,.55,lampMat,lamps);
-    for(const [x,z] of [[-30,-30],[30,-30],[-30,30],[30,30],[-95,0],[95,0],[0,-95],[0,95]]) this.addTree(x,z,.9);
-    for(const [x,z] of [[-24,-24],[24,-24],[-24,24],[24,24]]) {
+    for(const [x,z] of [[-30,-30],[30,-30],[-30,30],[30,30]]) {
       this.addBox(.55,1,.55,this.shared.dark,x,.7,z,true);
       this.addCollider(x,z,.275,.275);
       this.addBox(2,.18,.12,this.shared.yellow,x,2.2,z,true);
     }
   }
   buildOuterDistricts() {
-    // Expansão periférica: vias largas, bairros com silhuetas variadas e vegetação.
-    const roads=[-180,-140,140,180];
-    const dashH=[],dashV=[],trees=[];
-    for(const z of roads) {
-      this.addBox(390,.12,13,this.shared.asphalt,0,.02,z);
-      this.addBox(390,.08,.9,this.shared.yellow,0,.095,z);
-      for(let x=-190;x<=190;x+=16) dashH.push([x,.105,z-4.2]);
-      for(const side of [-1,1]) this.addBox(390,.24,2.4,this.shared.sidewalk,0,.12,z+side*8.1);
-    }
-    for(const x of roads) {
-      this.addBox(13,.12,390,this.shared.asphalt,x,.02,0);
-      this.addBox(.9,.08,390,this.shared.yellow,x,.095,0);
-      for(let z=-190;z<=190;z+=16) dashV.push([x-4.2,.105,z]);
-      for(const side of [-1,1]) this.addBox(2.4,.24,390,this.shared.sidewalk,x+side*8.1,.12,0);
-    }
-    this.addInstances(4,.025,.16,this.shared.white,dashH);
-    this.addInstances(.16,.025,4,this.shared.white,dashV);
-    // Quadras periféricas com composição determinística, sem copiar o mesmo edifício.
-    let seed=9281; const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    const blocks=[];
-    for(const cx of [-160,160]) for(const cz of [-160,160]) blocks.push([cx,cz,'mixed']);
-    for(const cx of [-160,160]) blocks.push([cx,0,'industrial']);
-    for(const cz of [-160,160]) blocks.push([0,cz,'park']);
-    const palette=[0xc6b7a2,0x9aaeb8,0xd1c8b8,0xb8a39c,0x8d9692,0xe0d4c3,0x6f8992,0xa6a58e];
-    for(const [cx,cz,type] of blocks) {
-      if(type==='park') {
-        this.addBox(52,.16,52,this.shared.grass,cx,.02,cz);
-        for(let i=0;i<16;i++) {
-          const x=cx+(rand()-.5)*42,z=cz+(rand()-.5)*42,s=.75+rand()*.5;
-          this.addTree(x,z,s);
-          if(i%3===0) this.addBox(2.8,.35,.65,this.shared.trunk,x+3,.45,z+1,true);
-        }
-        // caminhos cruzados e pequenos espaços de descanso
-        this.addBox(3,.08,46,this.shared.sidewalk,cx,.13,cz);
-        this.addBox(46,.08,3,this.shared.sidewalk,cx,.13,cz);
-        continue;
-      }
-      for(let i=0;i<9;i++) {
-        const x=cx+(rand()-.5)*44,z=cz+(rand()-.5)*44;
-        const w=type==='industrial'?12+rand()*9:8+rand()*7;
-        const d=type==='industrial'?15+rand()*11:8+rand()*9;
-        const h=type==='industrial'?5+rand()*4:7+rand()*22;
-        const mat=new THREE.MeshStandardMaterial({color:palette[Math.floor(rand()*palette.length)],roughness:.88});
-        const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-        body.position.set(x,.25+h/2,z);body.castShadow=h<16;body.receiveShadow=true;this.scene.add(body);
-        this.addCollider(x,z,w/2,d/2);
-        this.addBox(w+.35,.3,d+.35,this.shared.dark,x,.25+h+.16,z);
-        if(type==='industrial') {
-          this.addBox(w*.45,.7,d*.45,this.shared.concrete,x,1,z,true);
-          this.addBox(w*.6,.12,.22,this.shared.yellow,x,.8,z+d/2+.12,true);
-        } else if(h>12) {
-          // Sutileza de balcões e variação de silhueta em vez de repetir fachadas.
-          for(let yy=4;yy<h-2;yy+=5) if(rand()>.4) this.addBox(w+.25,.12,.28,this.shared.concrete,x,yy,z+d/2+.12);
-        }
-        if(rand()>.35) {
-          const signMat=rand()>.5?this.shared.yellow:this.shared.white;
-          this.addBox(w*.45,.35,.18,signMat,x,1.8,z+d/2+.16);
-        }
-      }
-    }
-    // Rotatórias, pequenas ilhas verdes e arborização ao longo das vias externas.
-    for(const [x,z] of [[-140,-140],[140,-140],[-140,140],[140,140]]) {
-      this.addBox(11,.25,11,this.shared.grass,x,.16,z);
-      this.addTree(x,z,1.05);
-    }
-    for(const z of [-180,-140,140,180]) for(const x of [-190,-155,-125,125,155,190]) trees.push([x,2.8,z+11]);
-    for(const x of [-180,-140,140,180]) for(const z of [-190,-155,-125,125,155,190]) trees.push([x+11,2.8,z]);
-    this.addInstances(.2,5.2,.2,this.shared.dark,trees);
+    // A expansão periférica foi integrada à malha regular em buildCityBlocks.
   }
   buildLandmark() {
     // Letreiro monumental inspirado na referência: letras maciças em concreto e roxo,
@@ -500,7 +453,7 @@ class World {
       if (Math.abs(x) < 9 && Math.abs(z) < 9) return 0.34; // gramado elevado da praça
       return 0.2225; // placas de concreto da praça
     }
-    for (const road of [-180,-140,-78,-38,38,78,140,180]) {
+    for (const road of [-180,-120,-60,60,120,180]) {
       if (Math.abs(z-road) <= 7) return 0.08;
       if (Math.abs(x-road) <= 7) return 0.08;
       if (Math.abs(z-(road-8.1)) <= 1.4 || Math.abs(z-(road+8.1)) <= 1.4) return 0.27;
