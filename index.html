@@ -194,7 +194,7 @@ class Input {
       return fallback[e.key] || e.code || e.key;
     };
     const down = (e) => {
-      if (!this.enabled || !document.getElementById('phone')?.classList.contains('hidden') === false) return;
+      if (!this.enabled || !document.getElementById('phone')?.classList.contains('hidden')) return;
       const code = normalize(e);
       if (prevent.has(code) || ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(code)) e.preventDefault();
       if (code === 'Space' && !e.repeat) this.jumpQueued = true;
