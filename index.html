@@ -1069,7 +1069,7 @@ class Game {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     if (this.state === 'playing') {
       this.cameraRig.updateLook(this.input.consumeMouse());
-      this.player.update(dt, this.input, this.cameraRig.yaw);
+      this.player.update(dt, this.input, this.cameraRig.yaw);\n      const dbg=document.getElementById('wasd-debug'); if(dbg){dbg.classList.add('active'); const ax=this.input.getMoveAxis(); dbg.textContent='DIAGNÓSTICO WASD\\nEstado: '+this.state+'\\nInput: '+this.input.enabled+'\\nTeclas: '+[...this.input.keys].join(', ')+'\\nEixo X: '+ax.x+' | Y: '+ax.y;}
       this.cameraRig.update(dt);
       this.multiplayer.sendState(performance.now());
     }
@@ -1126,5 +1126,7 @@ if(DEVICE_MODE==='mobile'){
 }
 window.minecity = { game }; // facilita testes no console (F12)
 </script>
+
+<style>#wasd-debug{position:fixed;left:12px;top:90px;z-index:60;background:#111e;color:#fff;border:2px solid #ff0;padding:10px 12px;border-radius:10px;font:14px monospace;pointer-events:none;white-space:pre;display:none}#wasd-debug.active{display:block}</style><div id="wasd-debug"></div>
 </body>
 </html>
