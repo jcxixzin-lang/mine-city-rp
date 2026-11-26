@@ -184,26 +184,27 @@ class Input {
     this.dragging = false;
     this.touchAxis={x:0,y:0}; this.touchSprint=false;
     const prevent = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
-
-    // Captura teclado global e normaliza teclas, independentemente do foco do canvas.
-    const keyCode = (e) => {
-      const keyMap = {w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',W:'KeyW',A:'KeyA',S:'KeyS',D:'KeyD',
-        ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight',
-        ' ':'Space',Shift:'ShiftLeft'};
-      return keyMap[e.key] || e.code;
+    const movementCodes = new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space']);
+    const normalize = (e) => {
+      // Prefer physical key codes; fallback for browsers that report only key.
+      if (movementCodes.has(e.code)) return e.code;
+      const fallback = {'w':'KeyW','W':'KeyW','a':'KeyA','A':'KeyA','s':'KeyS','S':'KeyS','d':'KeyD','D':'KeyD',
+        'ArrowUp':'ArrowUp','ArrowDown':'ArrowDown','ArrowLeft':'ArrowLeft','ArrowRight':'ArrowRight',
+        ' ':'Space','Spacebar':'Space','Shift':'ShiftLeft'};
+      return fallback[e.key] || e.code || e.key;
     };
     const down = (e) => {
-      if (!this.enabled || document.getElementById('phone')?.classList.contains('hidden') === false) return;
-      const code = keyCode(e);
+      if (!this.enabled || !document.getElementById('phone')?.classList.contains('hidden') === false) return;
+      const code = normalize(e);
       if (prevent.has(code) || ['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(code)) e.preventDefault();
       if (code === 'Space' && !e.repeat) this.jumpQueued = true;
       this.keys.add(code);
     };
-    const up = (e) => { this.keys.delete(keyCode(e)); };
+    const up = (e) => { this.keys.delete(normalize(e)); };
+    // One capture listener per event avoids duplicate handling and lets movement
+    // keys work even when the canvas is not the focused element.
     window.addEventListener('keydown', down, {capture:true});
-    document.addEventListener('keydown', down, {capture:true});
     window.addEventListener('keyup', up, {capture:true});
-    document.addEventListener('keyup', up, {capture:true});
     window.addEventListener('blur', () => this.reset());
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.reset(); });
     lockElement.addEventListener('mousedown', (e) => { if (e.button === 0) this.dragging = true; });
