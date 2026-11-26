@@ -1069,7 +1069,8 @@ class Game {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     if (this.state === 'playing') {
       this.cameraRig.updateLook(this.input.consumeMouse());
-      this.player.update(dt, this.input, this.cameraRig.yaw);\n      const dbg=document.getElementById('wasd-debug'); if(dbg){dbg.classList.add('active'); const ax=this.input.getMoveAxis(); dbg.textContent='DIAGNÓSTICO WASD\\nEstado: '+this.state+'\\nInput: '+this.input.enabled+'\\nTeclas: '+[...this.input.keys].join(', ')+'\\nEixo X: '+ax.x+' | Y: '+ax.y;}
+      this.player.update(dt, this.input, this.cameraRig.yaw);
+      const dbg=document.getElementById('wasd-debug'); if(dbg){dbg.classList.add('active'); const ax=this.input.getMoveAxis(); dbg.textContent='DIAGNÓSTICO WASD\\nEstado: '+this.state+'\\nInput: '+this.input.enabled+'\\nTeclas: '+[...this.input.keys].join(', ')+'\\nEixo X: '+ax.x+' | Y: '+ax.y;}
       this.cameraRig.update(dt);
       this.multiplayer.sendState(performance.now());
     }
